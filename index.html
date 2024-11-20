@@ -36,7 +36,7 @@
             const dataContainer = document.getElementById('data');
             dataContainer.innerHTML = '<p class="loading">Carregando dados...</p>';
             
-            fetch('https://api-teste-pi.vercel.app/')
+            fetch('https://api-teste-pi.vercel.app/?vercelToolbarCode=OKxjewm5xRbeftb')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
