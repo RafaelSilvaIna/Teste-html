@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumindo API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 20px;
+        }
+        #data {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
+        .loading {
+            color: #007bff;
+        }
+        .error {
+            color: #ff4d4d;
+        }
+    </style>
+</head>
+<body>
+    <h1>Consumindo a API</h1>
+    <button id="fetchData">Carregar Dados</button>
+    <div id="data">
+        <p>Clique no botão acima para carregar os dados da API.</p>
+    </div>
+
+    <script>
+        document.getElementById('fetchData').addEventListener('click', () => {
+            const dataContainer = document.getElementById('data');
+            dataContainer.innerHTML = '<p class="loading">Carregando dados...</p>';
+            
+            fetch('https://api-teste-pi.vercel.app/?vercelToolbarCode=rUhXU2yOhalnPCO')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Renderiza os dados da API no HTML
+                    dataContainer.innerHTML = `
+                        <h3>Dados Retornados:</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                })
+                .catch(error => {
+                    // Exibe erro, caso ocorra
+                    dataContainer.innerHTML = `<p class="error">Erro ao carregar os dados: ${error.message}</p>`;
+                });
+        });
+    </script>
+</body>
+</html>
