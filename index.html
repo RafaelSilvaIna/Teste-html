@@ -1,60 +1,170 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consumindo API</title>
+    <title>Boletim Escolar - Rafael Silva Inacio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 20px;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
         }
-        #data {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
             background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         }
-        .loading {
-            color: #007bff;
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
-        .error {
-            color: #ff4d4d;
+        th {
+            background-color: #3498db;
+            color: #fff;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .badge {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .badge-green {
+            background-color: #2ecc71;
+            color: #fff;
+        }
+        .badge-yellow {
+            background-color: #f1c40f;
+            color: #fff;
+        }
+        .badge-red {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+        .icon {
+            margin-right: 10px;
+        }
+        @media (max-width: 600px) {
+            table, tr, td {
+                display: block;
+            }
+            tr {
+                margin-bottom: 15px;
+            }
+            td {
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+            }
+            td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 6px;
+                width: 45%;
+                text-align: left;
+                font-weight: bold;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Consumindo a API</h1>
-    <button id="fetchData">Carregar Dados</button>
-    <div id="data">
-        <p>Clique no botão acima para carregar os dados da API.</p>
-    </div>
+    <h1>Boletim Escolar - Rafael Silva Inacio</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Disciplina</th>
+                <th>Nota Necessária</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-book icon"></i>Português</td>
+                <td data-label="Nota Necessária">6</td>
+                <td data-label="Status"><span class="badge badge-yellow">Atenção</span></td>
+            </tr>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-pen icon"></i>Redação</td>
+                <td data-label="Nota Necessária">2</td>
+                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
+            </tr>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-calculator icon"></i>Matemática 1</td>
+                <td data-label="Nota Necessária">6</td>
+                <td data-label="Status"><span class="badge badge-yellow">Atenção</span></td>
+            </tr>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-square-root-alt icon"></i>Matemática 2</td>
+                <td data-label="Nota Necessária">6</td>
+                <td data-label="Status"><span class="badge badge-yellow">Atenção</span></td>
+            </tr>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-flask icon"></i>Ciências</td>
+                <td data-label="Nota Necessária">1</td>
+                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
+            </tr>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-landmark icon"></i>História</td>
+                <td data-label="Nota Necessária">2</td>
+                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
+            </tr>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-globe icon"></i>Geografia</td>
+                <td data-label="Nota Necessária">1</td>
+                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
+            </tr>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-church icon"></i>Ensino Religioso</td>
+                <td data-label="Nota Necessária">0,5</td>
+                <td data-label="Status"><span class="badge badge-green">Aprovado</span></td>
+            </tr>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-brain icon"></i>Filosofia</td>
+                <td data-label="Nota Necessária">2</td>
+                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
+            </tr>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-palette icon"></i>Arte</td>
+                <td data-label="Nota Necessária">2</td>
+                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
+            </tr>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-dumbbell icon"></i>Educação Física</td>
+                <td data-label="Nota Necessária">3</td>
+                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
+            </tr>
+            <tr>
+                <td data-label="Disciplina"><i class="fas fa-language icon"></i>Inglês</td>
+                <td data-label="Nota Necessária">3</td>
+                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
+            </tr>
+        </tbody>
+    </table>
 
     <script>
-        document.getElementById('fetchData').addEventListener('click', () => {
-            const dataContainer = document.getElementById('data');
-            dataContainer.innerHTML = '<p class="loading">Carregando dados...</p>';
-            
-            fetch('https://api-teste-pi.vercel.app/?vercelToolbarCode=OKxjewm5xRbeftb')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Renderiza os dados da API no HTML
-                    dataContainer.innerHTML = `
-                        <h3>Dados Retornados:</h3>
-                        <pre>${JSON.stringify(data, null, 2)}</pre>
-                    `;
-                })
-                .catch(error => {
-                    // Exibe erro, caso ocorra
-                    dataContainer.innerHTML = `<p class="error">Erro ao carregar os dados: ${error.message}</p>`;
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('click', () => {
+                    row.style.backgroundColor = row.style.backgroundColor === 'lightyellow' ? '' : 'lightyellow';
                 });
+            });
         });
     </script>
 </body>
-</html>
+                                                      </html>
