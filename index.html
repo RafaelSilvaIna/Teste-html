@@ -1,170 +1,105 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boletim Escolar - Rafael Silva Inacio</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Perfil do Usuário</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
+        .banner {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
         }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border: 4px solid white;
+            margin-top: -75px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        .animated-bg {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
         }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #3498db;
-            color: #fff;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        .badge {
-            padding: 5px 10px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            font-weight: bold;
-        }
-        .badge-green {
-            background-color: #2ecc71;
-            color: #fff;
-        }
-        .badge-yellow {
-            background-color: #f1c40f;
-            color: #fff;
-        }
-        .badge-red {
-            background-color: #e74c3c;
-            color: #fff;
-        }
-        .icon {
-            margin-right: 10px;
-        }
-        @media (max-width: 600px) {
-            table, tr, td {
-                display: block;
-            }
-            tr {
-                margin-bottom: 15px;
-            }
-            td {
-                text-align: right;
-                padding-left: 50%;
-                position: relative;
-            }
-            td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 6px;
-                width: 45%;
-                text-align: left;
-                font-weight: bold;
-            }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
     </style>
 </head>
-<body>
-    <h1>Boletim Escolar - Rafael Silva Inacio</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Disciplina</th>
-                <th>Nota Necessária</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-book icon"></i>Português</td>
-                <td data-label="Nota Necessária">6</td>
-                <td data-label="Status"><span class="badge badge-yellow">Atenção</span></td>
-            </tr>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-pen icon"></i>Redação</td>
-                <td data-label="Nota Necessária">2</td>
-                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
-            </tr>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-calculator icon"></i>Matemática 1</td>
-                <td data-label="Nota Necessária">6</td>
-                <td data-label="Status"><span class="badge badge-yellow">Atenção</span></td>
-            </tr>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-square-root-alt icon"></i>Matemática 2</td>
-                <td data-label="Nota Necessária">6</td>
-                <td data-label="Status"><span class="badge badge-yellow">Atenção</span></td>
-            </tr>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-flask icon"></i>Ciências</td>
-                <td data-label="Nota Necessária">1</td>
-                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
-            </tr>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-landmark icon"></i>História</td>
-                <td data-label="Nota Necessária">2</td>
-                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
-            </tr>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-globe icon"></i>Geografia</td>
-                <td data-label="Nota Necessária">1</td>
-                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
-            </tr>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-church icon"></i>Ensino Religioso</td>
-                <td data-label="Nota Necessária">0,5</td>
-                <td data-label="Status"><span class="badge badge-green">Aprovado</span></td>
-            </tr>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-brain icon"></i>Filosofia</td>
-                <td data-label="Nota Necessária">2</td>
-                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
-            </tr>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-palette icon"></i>Arte</td>
-                <td data-label="Nota Necessária">2</td>
-                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
-            </tr>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-dumbbell icon"></i>Educação Física</td>
-                <td data-label="Nota Necessária">3</td>
-                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
-            </tr>
-            <tr>
-                <td data-label="Disciplina"><i class="fas fa-language icon"></i>Inglês</td>
-                <td data-label="Nota Necessária">3</td>
-                <td data-label="Status"><span class="badge badge-red">Foco Necessário</span></td>
-            </tr>
-        </tbody>
-    </table>
+<body class="bg-gray-100">
+    <div id="app" class="container mx-auto p-4">
+        <!-- Banner Personalizável -->
+        <div class="banner rounded-t-lg" :style="{ backgroundImage: `url(${userProfile.banner})` }"></div>
+        
+        <!-- Foto de Perfil Dinâmica -->
+        <div class="flex justify-center">
+            <img :src="userProfile.profilePic" :alt="userProfile.name" class="profile-pic rounded-full object-cover">
+        </div>
+        
+        <!-- Nome e Status -->
+        <div class="text-center mt-4">
+            <h1 class="text-3xl font-bold" :style="{ color: userProfile.colors.name }">{{ userProfile.name }}</h1>
+            <p class="text-lg text-gray-600">{{ userProfile.status }}</p>
+        </div>
+        
+        <!-- Descrição/Bio Customizável -->
+        <div class="mt-4 p-4 bg-white rounded-lg shadow" v-html="userProfile.bio"></div>
+        
+        <!-- Links e Botões Personalizados -->
+        <div class="mt-4 flex justify-center space-x-4">
+            <a v-for="link in userProfile.links" :key="link.url" :href="link.url" 
+               class="px-4 py-2 rounded-full" :style="{ backgroundColor: link.color, color: 'white' }">
+                {{ link.text }}
+            </a>
+        </div>
+        
+        <!-- Seções Reordenáveis -->
+        <div v-for="section in userProfile.sections" :key="section.title" class="mt-4 p-4 bg-white rounded-lg shadow">
+            <h2 class="text-xl font-bold mb-2">{{ section.title }}</h2>
+            <p>{{ section.content }}</p>
+        </div>
+        
+        <!-- Badges -->
+        <div class="mt-4 flex justify-center space-x-2">
+            <span v-for="badge in userProfile.badges" :key="badge" 
+                  class="px-2 py-1 bg-blue-500 text-white rounded-full text-sm">
+                {{ badge }}
+            </span>
+        </div>
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const rows = document.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                row.addEventListener('click', () => {
-                    row.style.backgroundColor = row.style.backgroundColor === 'lightyellow' ? '' : 'lightyellow';
-                });
-            });
+        new Vue({
+            el: '#app',
+            data: {
+                userProfile: {
+                    name: 'João Silva',
+                    banner: 'https://source.unsplash.com/random/1000x200',
+                    profilePic: 'https://source.unsplash.com/random/150x150',
+                    status: 'Online',
+                    bio: '<strong>Olá!</strong> Sou um desenvolvedor apaixonado por tecnologia. 🚀',
+                    colors: {
+                        name: '#4a5568',
+                        background: '#f7fafc'
+                    },
+                    links: [
+                        { text: 'GitHub', url: '#', color: '#333' },
+                        { text: 'LinkedIn', url: '#', color: '#0077b5' },
+                        { text: 'Twitter', url: '#', color: '#1da1f2' }
+                    ],
+                    sections: [
+                        { title: 'Projetos', content: 'Projeto A, Projeto B, Projeto C' },
+                        { title: 'Habilidades', content: 'JavaScript, Vue.js, Node.js' }
+                    ],
+                    badges: ['Desenvolvedor', 'Designer', 'Inovador']
+                }
+            }
         });
     </script>
 </body>
-                                                      </html>
+</html>
+
