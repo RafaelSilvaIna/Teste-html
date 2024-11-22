@@ -1,105 +1,495 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil do Usuário</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <title>Advanced Mobile VS Code IDE</title>
     <style>
-        .banner {
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #3c3c3c;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: #d4d4d4;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        .main-content {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #252526;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            background-color: #2d2d2d;
+        }
+
+        .sidebar-tab {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .sidebar-tab.active {
+            background-color: #1e1e1e;
+        }
+
+        .sidebar-content {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .file-explorer, .extensions, .git {
+            padding: 10px;
+        }
+
+        .file {
+            padding: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .file:hover {
+            background-color: #2a2d2e;
+        }
+
+        .file-icon {
+            margin-right: 5px;
+        }
+
+        .editor {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #2d2d2d;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 8px 15px;
+            background-color: #1e1e1e;
+            border-right: 1px solid #252526;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+        }
+
+        .tab.active {
+            background-color: #1e1e1e;
+        }
+
+        .close-tab {
+            margin-left: 5px;
+            opacity: 0.5;
+        }
+
+        .close-tab:hover {
+            opacity: 1;
+        }
+
+        #editor-content {
+            flex-grow: 1;
+            padding: 10px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            resize: none;
+            outline: none;
+            white-space: pre-wrap;
+        }
+
+        .terminal {
             height: 200px;
-            background-size: cover;
-            background-position: center;
+            background-color: #1e1e1e;
+            border-top: 1px solid #454545;
+            overflow-y: auto;
+            padding: 10px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
         }
-        .profile-pic {
-            width: 150px;
-            height: 150px;
-            border: 4px solid white;
-            margin-top: -75px;
+
+        #terminal-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
         }
-        .animated-bg {
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
+
+        #terminal-input-container {
+            display: flex;
+            align-items: center;
         }
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+
+        #terminal-prompt {
+            color: #569cd6;
+            margin-right: 5px;
         }
+
+        #terminal-input {
+            flex-grow: 1;
+            background-color: transparent;
+            border: none;
+            color: #d4d4d4;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+        }
+
+        .status-bar {
+            background-color: #007acc;
+            color: #ffffff;
+            padding: 5px 10px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                height: 100%;
+                z-index: 1;
+            }
+
+            .editor {
+                width: 100%;
+            }
+        }
+
+        /* Syntax highlighting */
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; }
+        .number { color: #b5cea8; }
+        .function { color: #dcdcaa; }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div id="app" class="container mx-auto p-4">
-        <!-- Banner Personalizável -->
-        <div class="banner rounded-t-lg" :style="{ backgroundImage: `url(${userProfile.banner})` }"></div>
-        
-        <!-- Foto de Perfil Dinâmica -->
-        <div class="flex justify-center">
-            <img :src="userProfile.profilePic" :alt="userProfile.name" class="profile-pic rounded-full object-cover">
+<body>
+    <div class="header">
+        <button class="menu-btn" id="menu-toggle">☰</button>
+        <span>Advanced Mobile VS Code IDE</span>
+    </div>
+    <div class="main-content">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-tabs">
+                <div class="sidebar-tab active" data-tab="files">Files</div>
+                <div class="sidebar-tab" data-tab="extensions">Extensions</div>
+                <div class="sidebar-tab" data-tab="git">Git</div>
+            </div>
+            <div class="sidebar-content">
+                <div class="file-explorer" id="file-explorer"></div>
+                <div class="extensions" style="display: none;">
+                    <div>Installed Extensions:</div>
+                    <div>- ESLint</div>
+                    <div>- Prettier</div>
+                    <div>- GitLens</div>
+                    <div>- Live Server</div>
+                </div>
+                <div class="git" style="display: none;">
+                    <div>Git Status:</div>
+                    <div>- 2 modified files</div>
+                    <div>- 1 new file</div>
+                </div>
+            </div>
         </div>
-        
-        <!-- Nome e Status -->
-        <div class="text-center mt-4">
-            <h1 class="text-3xl font-bold" :style="{ color: userProfile.colors.name }">{{ userProfile.name }}</h1>
-            <p class="text-lg text-gray-600">{{ userProfile.status }}</p>
+        <div class="editor">
+            <div class="tabs" id="tabs"></div>
+            <div id="editor-content" contenteditable="true" spellcheck="false"></div>
+            <div class="terminal">
+                <div id="terminal-content"></div>
+                <div id="terminal-input-container">
+                    <span id="terminal-prompt">$</span>
+                    <input type="text" id="terminal-input" placeholder="Type a command...">
+                </div>
+            </div>
         </div>
-        
-        <!-- Descrição/Bio Customizável -->
-        <div class="mt-4 p-4 bg-white rounded-lg shadow" v-html="userProfile.bio"></div>
-        
-        <!-- Links e Botões Personalizados -->
-        <div class="mt-4 flex justify-center space-x-4">
-            <a v-for="link in userProfile.links" :key="link.url" :href="link.url" 
-               class="px-4 py-2 rounded-full" :style="{ backgroundColor: link.color, color: 'white' }">
-                {{ link.text }}
-            </a>
-        </div>
-        
-        <!-- Seções Reordenáveis -->
-        <div v-for="section in userProfile.sections" :key="section.title" class="mt-4 p-4 bg-white rounded-lg shadow">
-            <h2 class="text-xl font-bold mb-2">{{ section.title }}</h2>
-            <p>{{ section.content }}</p>
-        </div>
-        
-        <!-- Badges -->
-        <div class="mt-4 flex justify-center space-x-2">
-            <span v-for="badge in userProfile.badges" :key="badge" 
-                  class="px-2 py-1 bg-blue-500 text-white rounded-full text-sm">
-                {{ badge }}
-            </span>
-        </div>
+    </div>
+    <div class="status-bar">
+        <span id="file-type">Plain Text</span>
+        <span id="cursor-position">Ln 1, Col 1</span>
     </div>
 
     <script>
-        new Vue({
-            el: '#app',
-            data: {
-                userProfile: {
-                    name: 'João Silva',
-                    banner: 'https://source.unsplash.com/random/1000x200',
-                    profilePic: 'https://source.unsplash.com/random/150x150',
-                    status: 'Online',
-                    bio: '<strong>Olá!</strong> Sou um desenvolvedor apaixonado por tecnologia. 🚀',
-                    colors: {
-                        name: '#4a5568',
-                        background: '#f7fafc'
-                    },
-                    links: [
-                        { text: 'GitHub', url: '#', color: '#333' },
-                        { text: 'LinkedIn', url: '#', color: '#0077b5' },
-                        { text: 'Twitter', url: '#', color: '#1da1f2' }
-                    ],
-                    sections: [
-                        { title: 'Projetos', content: 'Projeto A, Projeto B, Projeto C' },
-                        { title: 'Habilidades', content: 'JavaScript, Vue.js, Node.js' }
-                    ],
-                    badges: ['Desenvolvedor', 'Designer', 'Inovador']
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const fileExplorer = document.getElementById('file-explorer');
+        const tabs = document.getElementById('tabs');
+        const editorContent = document.getElementById('editor-content');
+        const terminalContent = document.getElementById('terminal-content');
+        const terminalInput = document.getElementById('terminal-input');
+        const fileTypeIndicator = document.getElementById('file-type');
+        const cursorPositionIndicator = document.getElementById('cursor-position');
+
+        let openFiles = [];
+        let activeFile = null;
+        let fileStructure = {
+            'src': {
+                'components': {
+                    'Header.js': '// Header component\nimport React from "react";\n\nconst Header = () => {\n  return <header>Welcome to our app!</header>;\n};\n\nexport default Header;',
+                    'Footer.js': '// Footer component\nimport React from "react";\n\nconst Footer = () => {\n  return <footer>&copy; 2023 Our Company</footer>;\n};\n\nexport default Footer;'
+                },
+                'App.js': '// Main App component\nimport React from "react";\nimport Header from "./components/Header";\nimport Footer from "./components/Footer";\n\nconst App = () => {\n  return (\n    <div>\n      <Header />\n      <main>App content goes here</main>\n      <Footer />\n    </div>\n  );\n};\n\nexport default App;'
+            },
+            'package.json': '{\n  "name": "advanced-ide-project",\n  "version": "1.0.0",\n  "dependencies": {\n    "react": "^17.0.2",\n    "react-dom": "^17.0.2",\n    "express": "^4.17.1",\n    "lodash": "^4.17.21"\n  }\n}',
+            'README.md': '# Advanced IDE Project\n\nThis is a sample project for our advanced mobile VS Code IDE.\n\n## Getting Started\n\n1. Clone the repository\n2. Run `npm install`\n3. Start the development server with `npm start`'
+        };
+
+        function createFileTree(structure, parent = fileExplorer, path = '') {
+            for (const [key, value] of Object.entries(structure)) {
+                const element = document.createElement('div');
+                element.classList.add('file');
+                
+                const icon = document.createElement('span');
+                icon.classList.add('file-icon');
+                
+                if (typeof value === 'object') {
+                    icon.textContent = '📁 ';
+                    element.appendChild(icon);
+                    element.appendChild(document.createTextNode(key));
+                    parent.appendChild(element);
+                    createFileTree(value, element, `${path}${key}/`);
+                } else {
+                    icon.textContent = '📄 ';
+                    element.appendChild(icon);
+                    element.appendChild(document.createTextNode(key));
+                    element.dataset.file = `${path}${key}`;
+                    element.addEventListener('click', () => openFile(`${path}${key}`));
+                    parent.appendChild(element);
                 }
             }
+        }
+
+        createFileTree(fileStructure);
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
         });
+
+        document.querySelectorAll('.sidebar-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                document.querySelectorAll('.sidebar-content > div').forEach(content => content.style.display = 'none');
+                document.querySelector(`.${e.target.dataset.tab}`).style.display = 'block';
+            });
+        });
+
+        tabs.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tab')) {
+                const fileName = e.target.dataset.file;
+                setActiveFile(fileName);
+            } else if (e.target.classList.contains('close-tab')) {
+                const fileName = e.target.parentElement.dataset.file;
+                closeFile(fileName);
+            }
+        });
+
+        function getFileContent(filePath) {
+            const pathParts = filePath.split('/');
+            let content = fileStructure;
+            for (const part of pathParts) {
+                content = content[part];
+            }
+            return content;
+        }
+
+        function openFile(filePath) {
+            if (!openFiles.includes(filePath)) {
+                openFiles.push(filePath);
+                const tab = document.createElement('div');
+                tab.classList.add('tab');
+                tab.dataset.file = filePath;
+                const fileName = filePath.split('/').pop();
+                tab.innerHTML = `${fileName} <span class="close-tab">×</span>`;
+                tabs.appendChild(tab);
+            }
+            setActiveFile(filePath);
+        }
+
+        function setActiveFile(filePath) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                if (tab.dataset.file === filePath) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            activeFile = filePath;
+            const content = getFileContent(filePath);
+            editorContent.innerHTML = highlightSyntax(content);
+            updateFileTypeIndicator(filePath);
+        }
+
+        function closeFile(filePath) {
+            openFiles = openFiles.filter(file => file !== filePath);
+            const tab = document.querySelector(`.tab[data-file="${filePath}"]`);
+            tab.remove();
+
+            if (activeFile === filePath) {
+                if (openFiles.length > 0) {
+                    setActiveFile(openFiles[openFiles.length - 1]);
+                } else {
+                    editorContent.textContent = '';
+                    activeFile = null;
+                }
+            }
+        }
+
+        function updateFileContent() {
+            if (activeFile) {
+                const pathParts = activeFile.split('/');
+                let current = fileStructure;
+                for (let i = 0; i < pathParts.length - 1; i++) {
+                    current = current[pathParts[i]];
+                }
+                current[pathParts[pathParts.length - 1]] = editorContent.textContent;
+            }
+        }
+
+        editorContent.addEventListener('input', updateFileContent);
+
+        editorContent.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                document.execCommand('insertText', false, '    ');
+            }
+        });
+
+        function updateCursorPosition() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const preCaretRange = range.cloneRange();
+                preCaretRange.selectNodeContents(editorContent);
+                preCaretRange.setEnd(range.endContainer, range.endOffset);
+                const text = preCaretRange.toString();
+                const lines = text.split('\n');
+                const currentLine = lines.length;
+                const currentColumn = lines[lines.length - 1].length + 1;
+                cursorPositionIndicator.textContent = `Ln ${currentLine}, Col ${currentColumn}`;
+            }
+        }
+
+        editorContent.addEventListener('keyup', updateCursorPosition);
+        editorContent.addEventListener('click', updateCursorPosition);
+
+        function updateFileTypeIndicator(filePath) {
+            const extension = filePath.split('.').pop().toLowerCase();
+            let fileType = 'Plain Text';
+            switch (extension) {
+                case 'js':
+                    fileType = 'JavaScript';
+                    break;
+                case 'html':
+                    fileType = 'HTML';
+                    break;
+                case 'css':
+                    fileType = 'CSS';
+                    break;
+                case 'json':
+                    fileType = 'JSON';
+                    break;
+                case 'md':
+                    fileType = 'Markdown';
+                    break;
+            }
+            fileTypeIndicator.textContent = fileType;
+        }
+
+        function highlightSyntax(code) {
+            return code
+                .replace(/\b(const|let|var|function|return|import|from|export|default)\b/g, '<span class="keyword">$1</span>')
+                .replace(/(["'`])(?:(?=(\\?))\2.)*?\1/g, '<span class="string">$&</span>')
+                .replace(/\/\/.*$/gm, '<span class="comment">$&</span>')
+                .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
+                .replace(/\b([a-zA-Z]+)(?=\()/g, '<span class="function">$1</span>');
+        }
+
+        terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const command = terminalInput.value;
+                terminalContent.innerHTML += `<div>> ${command}</div>`;
+                
+                let output = '';
+                if (command === 'ls') {
+                    output = Object.keys(fileStructure).join('\n');
+                } else if (command.startsWith('cat ')) {
+                    const fileName = command.split(' ')[1];
+                    output = getFileContent(fileName) || `File not found: ${fileName}`;
+                } else if (command === 'clear') {
+                    terminalContent.innerHTML = '';
+                } else if (command === 'npm install') {
+                    output = 'Installing dependencies...\n';
+                    setTimeout(() => {
+                        terminalContent.innerHTML += 'Dependencies installed successfully.\n';
+                    }, 2000);
+                } else if (command === 'npm start') {
+                    output = 'Starting development server...\n';
+                    setTimeout(() => {
+                        terminalContent.innerHTML += 'Development server running at http://localhost:3000\n';
+                    }, 2000);
+                } else {
+                    output = `Command not found: ${command}`;
+                }
+
+                if (output) {
+                    terminalContent.innerHTML += `<div>${output}</div>`;
+                }
+
+                terminalInput.value = '';
+                terminalContent.scrollTop = terminalContent.scrollHeight;
+            }
+        });
+
+        // Initialize with README.md open
+        openFile('README.md');
     </script>
 </body>
-</html>
-
+    </html>
