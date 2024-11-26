@@ -1,495 +1,137 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Mobile VS Code IDE</title>
+    <title>Formulário de Contato</title>
     <style>
         * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
 
-        .header {
-            background-color: #3c3c3c;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.form-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+}
 
-        .menu-btn {
-            background: none;
-            border: none;
-            color: #d4d4d4;
-            font-size: 1.5em;
-            cursor: pointer;
-        }
+h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
 
-        .main-content {
-            display: flex;
-            flex-grow: 1;
-            overflow: hidden;
-        }
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
 
-        .sidebar {
-            width: 250px;
-            background-color: #252526;
-            overflow-y: auto;
-            transition: transform 0.3s ease-in-out;
-            display: flex;
-            flex-direction: column;
-        }
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
 
-        .sidebar.hidden {
-            transform: translateX(-100%);
-        }
+button:hover {
+    background-color: #0056b3;
+}
 
-        .sidebar-tabs {
-            display: flex;
-            background-color: #2d2d2d;
-        }
+#statusMessage {
+    margin-top: 20px;
+    color: green;
+}
 
-        .sidebar-tab {
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        .sidebar-tab.active {
-            background-color: #1e1e1e;
-        }
-
-        .sidebar-content {
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        .file-explorer, .extensions, .git {
-            padding: 10px;
-        }
-
-        .file {
-            padding: 5px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-
-        .file:hover {
-            background-color: #2a2d2e;
-        }
-
-        .file-icon {
-            margin-right: 5px;
-        }
-
-        .editor {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .tabs {
-            display: flex;
-            background-color: #2d2d2d;
-            overflow-x: auto;
-        }
-
-        .tab {
-            padding: 8px 15px;
-            background-color: #1e1e1e;
-            border-right: 1px solid #252526;
-            cursor: pointer;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-        }
-
-        .tab.active {
-            background-color: #1e1e1e;
-        }
-
-        .close-tab {
-            margin-left: 5px;
-            opacity: 0.5;
-        }
-
-        .close-tab:hover {
-            opacity: 1;
-        }
-
-        #editor-content {
-            flex-grow: 1;
-            padding: 10px;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 14px;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
-            border: none;
-            resize: none;
-            outline: none;
-            white-space: pre-wrap;
-        }
-
-        .terminal {
-            height: 200px;
-            background-color: #1e1e1e;
-            border-top: 1px solid #454545;
-            overflow-y: auto;
-            padding: 10px;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 14px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #terminal-content {
-            flex-grow: 1;
-            overflow-y: auto;
-            margin-bottom: 10px;
-        }
-
-        #terminal-input-container {
-            display: flex;
-            align-items: center;
-        }
-
-        #terminal-prompt {
-            color: #569cd6;
-            margin-right: 5px;
-        }
-
-        #terminal-input {
-            flex-grow: 1;
-            background-color: transparent;
-            border: none;
-            color: #d4d4d4;
-            font-family: inherit;
-            font-size: inherit;
-            outline: none;
-        }
-
-        .status-bar {
-            background-color: #007acc;
-            color: #ffffff;
-            padding: 5px 10px;
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                position: absolute;
-                height: 100%;
-                z-index: 1;
-            }
-
-            .editor {
-                width: 100%;
-            }
-        }
-
-        /* Syntax highlighting */
-        .keyword { color: #569cd6; }
-        .string { color: #ce9178; }
-        .comment { color: #6a9955; }
-        .number { color: #b5cea8; }
-        .function { color: #dcdcaa; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <button class="menu-btn" id="menu-toggle">☰</button>
-        <span>Advanced Mobile VS Code IDE</span>
-    </div>
-    <div class="main-content">
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-tabs">
-                <div class="sidebar-tab active" data-tab="files">Files</div>
-                <div class="sidebar-tab" data-tab="extensions">Extensions</div>
-                <div class="sidebar-tab" data-tab="git">Git</div>
-            </div>
-            <div class="sidebar-content">
-                <div class="file-explorer" id="file-explorer"></div>
-                <div class="extensions" style="display: none;">
-                    <div>Installed Extensions:</div>
-                    <div>- ESLint</div>
-                    <div>- Prettier</div>
-                    <div>- GitLens</div>
-                    <div>- Live Server</div>
-                </div>
-                <div class="git" style="display: none;">
-                    <div>Git Status:</div>
-                    <div>- 2 modified files</div>
-                    <div>- 1 new file</div>
-                </div>
-            </div>
-        </div>
-        <div class="editor">
-            <div class="tabs" id="tabs"></div>
-            <div id="editor-content" contenteditable="true" spellcheck="false"></div>
-            <div class="terminal">
-                <div id="terminal-content"></div>
-                <div id="terminal-input-container">
-                    <span id="terminal-prompt">$</span>
-                    <input type="text" id="terminal-input" placeholder="Type a command...">
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="status-bar">
-        <span id="file-type">Plain Text</span>
-        <span id="cursor-position">Ln 1, Col 1</span>
+    <div class="form-container">
+        <h1>Entre em Contato</h1>
+        <form id="contactForm">
+            <label for="name">Nome Completo:</label>
+            <input type="text" id="name" required><br>
+
+            <label for="subject">Assunto:</label>
+            <input type="text" id="subject" required><br>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" required><br>
+
+            <label for="message">Mensagem:</label><br>
+            <textarea id="message" rows="5" required></textarea><br>
+
+            <button type="submit">Enviar</button>
+        </form>
+        <div id="statusMessage"></div>
     </div>
 
     <script>
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('sidebar');
-        const fileExplorer = document.getElementById('file-explorer');
-        const tabs = document.getElementById('tabs');
-        const editorContent = document.getElementById('editor-content');
-        const terminalContent = document.getElementById('terminal-content');
-        const terminalInput = document.getElementById('terminal-input');
-        const fileTypeIndicator = document.getElementById('file-type');
-        const cursorPositionIndicator = document.getElementById('cursor-position');
+        async function sendFormData(event) {
+    event.preventDefault();  // Evita o comportamento padrão do formulário (recarregar a página)
 
-        let openFiles = [];
-        let activeFile = null;
-        let fileStructure = {
-            'src': {
-                'components': {
-                    'Header.js': '// Header component\nimport React from "react";\n\nconst Header = () => {\n  return <header>Welcome to our app!</header>;\n};\n\nexport default Header;',
-                    'Footer.js': '// Footer component\nimport React from "react";\n\nconst Footer = () => {\n  return <footer>&copy; 2023 Our Company</footer>;\n};\n\nexport default Footer;'
-                },
-                'App.js': '// Main App component\nimport React from "react";\nimport Header from "./components/Header";\nimport Footer from "./components/Footer";\n\nconst App = () => {\n  return (\n    <div>\n      <Header />\n      <main>App content goes here</main>\n      <Footer />\n    </div>\n  );\n};\n\nexport default App;'
+    // Coleta os dados do formulário
+    const name = document.getElementById('name').value;
+    const subject = document.getElementById('subject').value;
+    const email = document.getElementById('email').value;
+    const message = document.getElementById('message').value;
+
+    // Cria um objeto com os dados do formulário
+    const data = {
+        name: name,
+        subject: subject,
+        email: email,
+        message: message
+    };
+
+    // Exibe uma mensagem de carregamento enquanto aguarda a resposta da API
+    document.getElementById('statusMessage').textContent = 'Enviando...';
+
+    try {
+        const response = await fetch('https://checkered-root-rhinoceros.glitch.me/submit-contact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             },
-            'package.json': '{\n  "name": "advanced-ide-project",\n  "version": "1.0.0",\n  "dependencies": {\n    "react": "^17.0.2",\n    "react-dom": "^17.0.2",\n    "express": "^4.17.1",\n    "lodash": "^4.17.21"\n  }\n}',
-            'README.md': '# Advanced IDE Project\n\nThis is a sample project for our advanced mobile VS Code IDE.\n\n## Getting Started\n\n1. Clone the repository\n2. Run `npm install`\n3. Start the development server with `npm start`'
-        };
-
-        function createFileTree(structure, parent = fileExplorer, path = '') {
-            for (const [key, value] of Object.entries(structure)) {
-                const element = document.createElement('div');
-                element.classList.add('file');
-                
-                const icon = document.createElement('span');
-                icon.classList.add('file-icon');
-                
-                if (typeof value === 'object') {
-                    icon.textContent = '📁 ';
-                    element.appendChild(icon);
-                    element.appendChild(document.createTextNode(key));
-                    parent.appendChild(element);
-                    createFileTree(value, element, `${path}${key}/`);
-                } else {
-                    icon.textContent = '📄 ';
-                    element.appendChild(icon);
-                    element.appendChild(document.createTextNode(key));
-                    element.dataset.file = `${path}${key}`;
-                    element.addEventListener('click', () => openFile(`${path}${key}`));
-                    parent.appendChild(element);
-                }
-            }
-        }
-
-        createFileTree(fileStructure);
-
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
+            body: JSON.stringify(data)
         });
 
-        document.querySelectorAll('.sidebar-tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
-                e.target.classList.add('active');
-                document.querySelectorAll('.sidebar-content > div').forEach(content => content.style.display = 'none');
-                document.querySelector(`.${e.target.dataset.tab}`).style.display = 'block';
-            });
-        });
-
-        tabs.addEventListener('click', (e) => {
-            if (e.target.classList.contains('tab')) {
-                const fileName = e.target.dataset.file;
-                setActiveFile(fileName);
-            } else if (e.target.classList.contains('close-tab')) {
-                const fileName = e.target.parentElement.dataset.file;
-                closeFile(fileName);
-            }
-        });
-
-        function getFileContent(filePath) {
-            const pathParts = filePath.split('/');
-            let content = fileStructure;
-            for (const part of pathParts) {
-                content = content[part];
-            }
-            return content;
+        if (response.ok) {
+            const result = await response.json();
+            document.getElementById('statusMessage').textContent = 'Mensagem enviada com sucesso!';
+            document.getElementById('statusMessage').style.color = 'green';
+            // Limpar os campos do formulário após envio
+            document.getElementById('contactForm').reset();
+        } else {
+            const error = await response.json();
+            document.getElementById('statusMessage').textContent = 'Erro ao enviar mensagem!';
+            document.getElementById('statusMessage').style.color = 'red';
         }
+    } catch (error) {
+        document.getElementById('statusMessage').textContent = 'Erro na comunicação com a API!';
+        document.getElementById('statusMessage').style.color = 'red';
+    }
+}
 
-        function openFile(filePath) {
-            if (!openFiles.includes(filePath)) {
-                openFiles.push(filePath);
-                const tab = document.createElement('div');
-                tab.classList.add('tab');
-                tab.dataset.file = filePath;
-                const fileName = filePath.split('/').pop();
-                tab.innerHTML = `${fileName} <span class="close-tab">×</span>`;
-                tabs.appendChild(tab);
-            }
-            setActiveFile(filePath);
-        }
-
-        function setActiveFile(filePath) {
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => {
-                if (tab.dataset.file === filePath) {
-                    tab.classList.add('active');
-                } else {
-                    tab.classList.remove('active');
-                }
-            });
-
-            activeFile = filePath;
-            const content = getFileContent(filePath);
-            editorContent.innerHTML = highlightSyntax(content);
-            updateFileTypeIndicator(filePath);
-        }
-
-        function closeFile(filePath) {
-            openFiles = openFiles.filter(file => file !== filePath);
-            const tab = document.querySelector(`.tab[data-file="${filePath}"]`);
-            tab.remove();
-
-            if (activeFile === filePath) {
-                if (openFiles.length > 0) {
-                    setActiveFile(openFiles[openFiles.length - 1]);
-                } else {
-                    editorContent.textContent = '';
-                    activeFile = null;
-                }
-            }
-        }
-
-        function updateFileContent() {
-            if (activeFile) {
-                const pathParts = activeFile.split('/');
-                let current = fileStructure;
-                for (let i = 0; i < pathParts.length - 1; i++) {
-                    current = current[pathParts[i]];
-                }
-                current[pathParts[pathParts.length - 1]] = editorContent.textContent;
-            }
-        }
-
-        editorContent.addEventListener('input', updateFileContent);
-
-        editorContent.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                document.execCommand('insertText', false, '    ');
-            }
-        });
-
-        function updateCursorPosition() {
-            const selection = window.getSelection();
-            if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const preCaretRange = range.cloneRange();
-                preCaretRange.selectNodeContents(editorContent);
-                preCaretRange.setEnd(range.endContainer, range.endOffset);
-                const text = preCaretRange.toString();
-                const lines = text.split('\n');
-                const currentLine = lines.length;
-                const currentColumn = lines[lines.length - 1].length + 1;
-                cursorPositionIndicator.textContent = `Ln ${currentLine}, Col ${currentColumn}`;
-            }
-        }
-
-        editorContent.addEventListener('keyup', updateCursorPosition);
-        editorContent.addEventListener('click', updateCursorPosition);
-
-        function updateFileTypeIndicator(filePath) {
-            const extension = filePath.split('.').pop().toLowerCase();
-            let fileType = 'Plain Text';
-            switch (extension) {
-                case 'js':
-                    fileType = 'JavaScript';
-                    break;
-                case 'html':
-                    fileType = 'HTML';
-                    break;
-                case 'css':
-                    fileType = 'CSS';
-                    break;
-                case 'json':
-                    fileType = 'JSON';
-                    break;
-                case 'md':
-                    fileType = 'Markdown';
-                    break;
-            }
-            fileTypeIndicator.textContent = fileType;
-        }
-
-        function highlightSyntax(code) {
-            return code
-                .replace(/\b(const|let|var|function|return|import|from|export|default)\b/g, '<span class="keyword">$1</span>')
-                .replace(/(["'`])(?:(?=(\\?))\2.)*?\1/g, '<span class="string">$&</span>')
-                .replace(/\/\/.*$/gm, '<span class="comment">$&</span>')
-                .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
-                .replace(/\b([a-zA-Z]+)(?=\()/g, '<span class="function">$1</span>');
-        }
-
-        terminalInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const command = terminalInput.value;
-                terminalContent.innerHTML += `<div>> ${command}</div>`;
-                
-                let output = '';
-                if (command === 'ls') {
-                    output = Object.keys(fileStructure).join('\n');
-                } else if (command.startsWith('cat ')) {
-                    const fileName = command.split(' ')[1];
-                    output = getFileContent(fileName) || `File not found: ${fileName}`;
-                } else if (command === 'clear') {
-                    terminalContent.innerHTML = '';
-                } else if (command === 'npm install') {
-                    output = 'Installing dependencies...\n';
-                    setTimeout(() => {
-                        terminalContent.innerHTML += 'Dependencies installed successfully.\n';
-                    }, 2000);
-                } else if (command === 'npm start') {
-                    output = 'Starting development server...\n';
-                    setTimeout(() => {
-                        terminalContent.innerHTML += 'Development server running at http://localhost:3000\n';
-                    }, 2000);
-                } else {
-                    output = `Command not found: ${command}`;
-                }
-
-                if (output) {
-                    terminalContent.innerHTML += `<div>${output}</div>`;
-                }
-
-                terminalInput.value = '';
-                terminalContent.scrollTop = terminalContent.scrollHeight;
-            }
-        });
-
-        // Initialize with README.md open
-        openFile('README.md');
+// Associar a função ao evento de envio do formulário
+document.getElementById('contactForm').addEventListener('submit', sendFormData);
     </script>
 </body>
-    </html>
+</html>
