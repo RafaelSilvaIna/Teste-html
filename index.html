@@ -4,64 +4,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora do Amor</title>
+    <title>Calculadora do Amor Perfeito</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Poppins', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
             overflow: hidden;
         }
         .container {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             text-align: center;
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
             z-index: 1;
+            transition: all 0.3s ease;
+        }
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
         h1 {
-            color: #ff4b6a;
-            margin-bottom: 1.5rem;
+            color: #ff6b6b;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            font-size: 2.5rem;
         }
         input {
             width: calc(100% - 20px);
-            padding: 10px;
+            padding: 12px;
             margin: 10px 0;
-            border: 1px solid #ff4b6a;
-            border-radius: 5px;
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
             font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            border-color: #ff6b6b;
+            outline: none;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
         }
         button {
-            background-color: #ff4b6a;
+            background-color: #ff6b6b;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 25px;
             font-size: 18px;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            font-weight: 600;
         }
         button:hover {
-            background-color: #ff2a4d;
+            background-color: #ff8e8e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
         }
         #result {
-            font-size: 24px;
+            font-size: 36px;
             font-weight: bold;
-            margin-top: 20px;
-            color: #ff4b6a;
+            margin-top: 30px;
+            color: #ff6b6b;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.5s ease;
         }
         #message {
             margin-top: 20px;
             font-style: italic;
             color: #333;
+            opacity: 0;
+            transition: all 0.5s ease;
         }
         #hearts {
             position: absolute;
@@ -72,15 +97,26 @@
             pointer-events: none;
             z-index: 0;
         }
+        .heart-icon {
+            position: absolute;
+            font-size: 24px;
+            color: #ff6b6b;
+            opacity: 0;
+            animation: float 3s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
     </style>
 </head>
 <body>
     <div id="hearts"></div>
     <div class="container">
-        <h1>Calculadora do Amor</h1>
+        <h1>Calculadora do Amor Perfeito</h1>
         <input type="text" id="name1" placeholder="Nome da primeira pessoa">
         <input type="text" id="name2" placeholder="Nome da segunda pessoa">
-        <button onclick="calculateLove()">Calcular Amor</button>
+        <button onclick="calculateLove()">Revelar o Amor Perfeito</button>
         <div id="result"></div>
         <div id="message"></div>
     </div>
@@ -104,11 +140,23 @@
         heartShape.bezierCurveTo(x + 16, y + 7, x + 16, y, x + 10, y);
         heartShape.bezierCurveTo(x + 7, y, x + 5, y + 5, x + 5, y + 5);
 
-        const geometry = new THREE.ShapeGeometry(heartShape);
-        const material = new THREE.MeshBasicMaterial({ color: 0xff4b6a });
+        const geometry = new THREE.ExtrudeGeometry(heartShape, {
+            depth: 2,
+            bevelEnabled: true,
+            bevelSegments: 2,
+            steps: 2,
+            bevelSize: 1,
+            bevelThickness: 1
+        });
 
         const hearts = [];
         for (let i = 0; i < 50; i++) {
+            const material = new THREE.MeshPhongMaterial({
+                color: Math.random() * 0xff6b6b,
+                specular: 0xffffff,
+                shininess: 100,
+                side: THREE.DoubleSide
+            });
             const heart = new THREE.Mesh(geometry, material);
             heart.position.set(
                 Math.random() * 200 - 100,
@@ -121,6 +169,10 @@
             scene.add(heart);
             hearts.push(heart);
         }
+
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(0, 0, 20);
+        scene.add(light);
 
         camera.position.z = 100;
 
@@ -136,47 +188,46 @@
         animate();
 
         function calculateLove() {
-            const name1 = document.getElementById('name1').value.toLowerCase();
-            const name2 = document.getElementById('name2').value.toLowerCase();
+            const name1 = document.getElementById('name1').value.trim();
+            const name2 = document.getElementById('name2').value.trim();
             
             if (name1 && name2) {
-                let lovePercentage = Math.floor(Math.random() * 101);
-                
-                // Garantir 100% se os nomes forem iguais (caso especial)
-                if (name1 === name2) {
-                    lovePercentage = 100;
-                }
-
                 const resultElement = document.getElementById('result');
                 const messageElement = document.getElementById('message');
 
-                resultElement.innerHTML = `${lovePercentage}% de Amor`;
-                resultElement.style.fontSize = '36px';
-                resultElement.style.color = '#ff4b6a';
+                gsap.to(resultElement, { opacity: 0, scale: 0.5, duration: 0.3, onComplete: () => {
+                    resultElement.innerHTML = "100% de Amor Perfeito";
+                    gsap.to(resultElement, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" });
+                }});
 
-                if (lovePercentage === 100) {
-                    messageElement.innerHTML = "Parabéns! Vocês são almas gêmeas destinadas a um amor eterno. Cada momento juntos é uma celebração da perfeição do seu amor. Que sua jornada seja repleta de felicidade, compreensão e uma conexão que transcende o tempo.";
-                    celebrateLove();
-                } else {
-                    messageElement.innerHTML = "";
-                }
+                const messages = [
+                    `${name1} e ${name2}, vocês são a definição do amor perfeito! Cada momento juntos é uma celebração da harmonia e da conexão única que compartilham.`,
+                    `O universo conspirou para unir ${name1} e ${name2} em um amor tão puro e verdadeiro que transcende todas as barreiras. Vocês são verdadeiramente almas gêmeas!`,
+                    `${name1} e ${name2}, o amor de vocês é como uma sinfonia perfeita, onde cada nota ressoa com paixão, compreensão e cumplicidade. Continuem dançando juntos nessa bela melodia da vida!`,
+                    `A história de amor entre ${name1} e ${name2} é prova viva de que o amor perfeito existe. Vocês são a inspiração para todos ao seu redor, irradiando felicidade e amor incondicional.`,
+                    `${name1} e ${name2}, juntos vocês formam um amor tão poderoso e belo que ilumina o mundo ao seu redor. Continuem nutrindo esse sentimento extraordinário que compartilham!`
+                ];
 
-                // Animação do resultado
-                let current = 0;
-                const timer = setInterval(() => {
-                    if (current < lovePercentage) {
-                        current++;
-                        resultElement.innerHTML = `${current}% de Amor`;
-                    } else {
-                        clearInterval(timer);
-                    }
-                }, 20);
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                
+                gsap.to(messageElement, { opacity: 0, duration: 0.3, onComplete: () => {
+                    messageElement.innerHTML = randomMessage;
+                    gsap.to(messageElement, { opacity: 1, duration: 0.5, delay: 0.3 });
+                }});
+
+                celebrateLove();
             }
         }
 
         function celebrateLove() {
             // Aumentar a quantidade de corações
             for (let i = 0; i < 100; i++) {
+                const material = new THREE.MeshPhongMaterial({
+                    color: Math.random() * 0xff6b6b,
+                    specular: 0xffffff,
+                    shininess: 100,
+                    side: THREE.DoubleSide
+                });
                 const heart = new THREE.Mesh(geometry, material);
                 heart.position.set(
                     Math.random() * 400 - 200,
@@ -194,28 +245,28 @@
             hearts.forEach(heart => {
                 const targetScale = 0.2 + Math.random() * 0.3;
                 const duration = 1000 + Math.random() * 2000;
-                animateScale(heart, targetScale, duration);
+                gsap.to(heart.scale, { x: targetScale, y: targetScale, z: targetScale, duration: duration / 1000, ease: "elastic.out(1, 0.3)" });
             });
-        }
 
-        function animateScale(object, targetScale, duration) {
-            const startScale = object.scale.x;
-            const startTime = Date.now();
+            // Adicionar corações 2D flutuantes
+            for (let i = 0; i < 50; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '❤️';
+                heart.className = 'heart-icon';
+                heart.style.left = `${Math.random() * 100}%`;
+                heart.style.top = `${Math.random() * 100}%`;
+                document.body.appendChild(heart);
 
-            function update() {
-                const currentTime = Date.now();
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-
-                const currentScale = startScale + (targetScale - startScale) * progress;
-                object.scale.set(currentScale, currentScale, currentScale);
-
-                if (progress < 1) {
-                    requestAnimationFrame(update);
-                }
+                gsap.to(heart, {
+                    opacity: 1,
+                    duration: 0.5,
+                    delay: Math.random() * 2,
+                    y: -100,
+                    ease: "power1.out",
+                    repeat: -1,
+                    yoyo: true
+                });
             }
-
-            update();
         }
 
         // Responsividade
