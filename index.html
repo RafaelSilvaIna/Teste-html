@@ -1,60 +1,238 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vulnerável Firebase App</title>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"></script>
+    <title>Tela de Carregamento Impressionante</title>
+    <style>
+        body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+#logo-container {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 20px;
+}
+
+#brand-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#loading-text {
+    color: #fff;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+#progress-bar-container {
+    width: 300px;
+    height: 10px;
+    background-color: #333;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#progress-bar {
+    width: 0;
+    height: 100%;
+    background-color: #4CAF50;
+    transition: width 0.5s ease-in-out;
+}
+
+#three-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+#particles-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+}
+
+
+    </style>
+    <!-- Bibliotecas CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css">
 </head>
 <body>
-    <h1>Enviar e exibir textos</h1>
-    <form id="textForm">
-        <label for="textInput">Digite um texto:</label>
-        <input type="text" id="textInput" required>
-        <button type="submit">Enviar</button>
-    </form>
-    <h2>Mensagens Salvas:</h2>
-    <ul id="messages"></ul>
+    <div id="loading-screen">
+        <div id="logo-container">
+            <!-- Substitua 'logo.svg' pelo caminho do seu arquivo de logo -->
+            <img src="logo.svg" alt="Logo da Marca" id="brand-logo" class="animate__animated animate__bounce">
+        </div>
+        <div id="loading-text" class="animate__animated animate__pulse animate__infinite">Carregando...</div>
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="three-container"></div>
+        <div id="particles-container"></div>
+    </div>
 
+    <!-- Bibliotecas JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.4/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lottie-web@5.9.6/build/player/lottie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12/lib/typed.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
     <script>
-        // Configuração do Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCiD2nECobQIzC03JvtQAnnA764zk4CfJ8",
-            authDomain: "b-1art.firebaseapp.com",
-            projectId: "b-1art",
-            storageBucket: "b-1art.firebasestorage.app",
-            messagingSenderId: "1007159305086",
-            appId: "1:1007159305086:web:405f8bb0b28941b4e2092f",
-            measurementId: "G-F66MM9LMRH"
-        };
+        // Inicialização do Three.js
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.getElementById('three-container').appendChild(renderer.domElement);
 
-        // Inicializa o Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+// Criação de um cubo 3D
+const geometry = new THREE.BoxGeometry();
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
 
-        // Referência ao banco de dados
-        const messagesRef = db.collection("messages");
+camera.position.z = 5;
 
-        // Enviar texto para o banco de dados
-        document.getElementById("textForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const textInput = document.getElementById("textInput").value;
-            await messagesRef.add({ text: textInput });
-            alert("Texto enviado!");
-        });
+// Animação do cubo
+function animate() {
+    requestAnimationFrame(animate);
+    cube.rotation.x += 0.01;
+    cube.rotation.y += 0.01;
+    renderer.render(scene, camera);
+}
+animate();
 
-        // Exibir textos
-        messagesRef.onSnapshot(snapshot => {
-            const messages = document.getElementById("messages");
-            messages.innerHTML = "";
-            snapshot.forEach(doc => {
-                const li = document.createElement("li");
-                li.textContent = doc.data().text;
-                messages.appendChild(li);
-            });
-        });
+// Inicialização do Particles.js
+particlesJS.load('particles-container', {
+    particles: {
+        number: { value: 80 },
+        color: { value: '#ffffff' },
+        shape: { type: 'circle' },
+        opacity: { value: 0.5, random: true },
+        size: { value: 3, random: true },
+        move: { enable: true, speed: 2 }
+    }
+});
+
+// Inicialização do Howler para som de fundo
+const sound = new Howl({
+    src: ['background-sound.mp3'],
+    loop: true,
+    volume: 0.5
+});
+sound.play();
+
+// Animação do logo usando GSAP
+gsap.to('#brand-logo', {
+    duration: 2,
+    rotation: 360,
+    repeat: -1,
+    ease: 'power2.inOut'
+});
+
+// Simulação de progresso de carregamento
+let progress = 0;
+const progressBar = document.getElementById('progress-bar');
+const loadingText = document.getElementById('loading-text');
+
+function updateProgress() {
+    if (progress < 100) {
+        progress += Math.random() * 10;
+        progress = Math.min(progress, 100);
+        progressBar.style.width = `${progress}%`;
+        
+        if (progress < 100) {
+            setTimeout(updateProgress, 200);
+        } else {
+            loadingText.textContent = 'Carregamento concluído!';
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = 'none';
+            }, 1000);
+        }
+    }
+}
+
+updateProgress();
+
+// Inicialização do AOS para animações de rolagem
+AOS.init();
+
+// Inicialização do Typed.js para efeito de digitação
+new Typed('#loading-text', {
+    strings: ['Carregando...', 'Quase lá...', 'Finalizando...'],
+    typeSpeed: 50,
+    backSpeed: 30,
+    loop: true
+});
+
+// Animação adicional com Anime.js
+anime({
+    targets: '#loading-screen',
+    backgroundColor: ['#000000', '#1a1a1a', '#000000'],
+    duration: 3000,
+    easing: 'easeInOutQuad',
+    loop: true
+});
+
+// Chart.js para visualização de dados (apenas para demonstração)
+const ctx = document.createElement('canvas');
+ctx.id = 'myChart';
+ctx.style.position = 'absolute';
+ctx.style.top = '10px';
+ctx.style.right = '10px';
+ctx.style.width = '200px';
+ctx.style.height = '200px';
+document.body.appendChild(ctx);
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Vermelho', 'Azul', 'Amarelo'],
+        datasets: [{
+            data: [300, 50, 100],
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+        }]
+    }
+});
+
+
     </script>
 </body>
 </html>
+
+
