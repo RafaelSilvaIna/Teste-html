@@ -1,144 +1,156 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ascendia - Cosmic Journey</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/postprocessing/6.29.3/postprocessing.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.5.2/browser/pixi.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <title>Login Cósmico</title>
     <style>
+        /* Estilos base */
         body, html {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
+            font-family: 'Arial', sans-serif;
             overflow: hidden;
-            font-family: 'Orbitron', sans-serif;
-            background-color: #000000;
-        }
-        #loading-screen {
-            position: fixed;
             width: 100%;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 1000;
         }
-        #cosmos-container {
-            position: absolute;
+        #scene-container {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            z-index: -1;
         }
-        #progress-container {
+        .form-container {
             position: absolute;
-            bottom: 20px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            color: #fff;
             max-width: 400px;
-        }
-        #progress-bar {
-            width: 0%;
-            height: 4px;
-            background: linear-gradient(90deg, #4a00e0, #8e2de2);
-            transition: width 0.05s ease;
-            box-shadow: 0 0 10px #4a00e0;
-        }
-        #brand-container {
-            position: absolute;
             width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
         }
-        #brand-name {
-            font-size: 72px;
-            font-weight: bold;
-            color: #ffffff;
-            text-shadow: 0 0 20px #4a00e0;
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
         }
-        .particle {
-            position: absolute;
-            background: radial-gradient(circle, #ffffff 0%, rgba(255,255,255,0) 70%);
-            border-radius: 50%;
-            pointer-events: none;
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .toggle-form {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .toggle-form a {
+            color: #4CAF50;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <div id="loading-screen">
-        <div id="cosmos-container"></div>
-        <div id="progress-container">
-            <div id="progress-bar"></div>
+    <div id="scene-container"></div>
+    
+    <div class="form-container" id="loginForm">
+        <h2>Login</h2>
+        <form>
+            <div class="input-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" required>
+            </div>
+            <div class="input-group">
+                <label for="loginPassword">Senha</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button type="submit" class="btn">Entrar</button>
+        </form>
+        <div class="toggle-form">
+            <a href="#" id="showRegister">Criar uma conta</a>
         </div>
     </div>
-    <div id="brand-container">
-        <div id="brand-name">ASCENDIA</div>
+
+    <div class="form-container" id="registerForm" style="display: none;">
+        <h2>Cadastro</h2>
+        <form>
+            <div class="input-group">
+                <label for="registerName">Nome</label>
+                <input type="text" id="registerName" required>
+            </div>
+            <div class="input-group">
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" required>
+            </div>
+            <div class="input-group">
+                <label for="registerPassword">Senha</label>
+                <input type="password" id="registerPassword" required>
+            </div>
+            <button type="submit" class="btn">Cadastrar</button>
+        </form>
+        <div class="toggle-form">
+            <a href="#" id="showLogin">Já tenho uma conta</a>
+        </div>
     </div>
 
+    <!-- Bibliotecas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tilt.js/1.2.1/tilt.jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/parallax/3.1.0/parallax.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.14/lottie.min.js"></script>
+    <script src="https://unpkg.com/@barba/core"></script>
+
     <script>
-        // Audio setup
-        const backgroundMusic = new Howl({
-            src: ['https://cdn.pixabay.com/download/audio/2022/03/15/audio_2dde668d05.mp3?filename=space-atmospheric-background-124841.mp3'],
-            loop: true,
-            volume: 0.5
-        });
-
-        const whooshSound = new Howl({
-            src: ['https://cdn.pixabay.com/download/audio/2022/03/10/audio_81bf0bb822.mp3?filename=whoosh-transitions-and-movement-140889.mp3'],
-            volume: 0.7
-        });
-
-        const impactSound = new Howl({
-            src: ['https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=impact-140622.mp3'],
-            volume: 0.8
-        });
-
-        // Three.js setup
+        // Configuração da cena Three.js
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('cosmos-container').appendChild(renderer.domElement);
+        document.getElementById('scene-container').appendChild(renderer.domElement);
 
-        // Postprocessing
-        const composer = new POSTPROCESSING.EffectComposer(renderer);
-        composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
-
-        const bloomEffect = new POSTPROCESSING.BloomEffect({
-            blendFunction: POSTPROCESSING.BlendFunction.SCREEN,
-            kernelSize: POSTPROCESSING.KernelSize.LARGE,
-            luminanceThreshold: 0.3,
-            luminanceSmoothing: 0.75,
-            intensity: 1.5
-        });
-
-        const effectPass = new POSTPROCESSING.EffectPass(camera, bloomEffect);
-        effectPass.renderToScreen = true;
-        composer.addPass(effectPass);
-
-        // Cosmic elements
+        // Criação de estrelas
         const starsGeometry = new THREE.BufferGeometry();
-        const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
+        const starsMaterial = new THREE.PointsMaterial({color: 0xFFFFFF});
 
         const starsVertices = [];
         for (let i = 0; i < 10000; i++) {
             const x = (Math.random() - 0.5) * 2000;
             const y = (Math.random() - 0.5) * 2000;
-            const z = (Math.random() - 0.5) * 2000;
+            const z = -Math.random() * 2000;
             starsVertices.push(x, y, z);
         }
 
@@ -146,129 +158,104 @@
         const starField = new THREE.Points(starsGeometry, starsMaterial);
         scene.add(starField);
 
-        // Nebula
-        const nebulaTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/venus.jpg');
-        const nebulaMaterial = new THREE.MeshBasicMaterial({ map: nebulaTexture, transparent: true, opacity: 0.5 });
-        const nebulaGeometry = new THREE.SphereGeometry(100, 32, 32);
-        const nebula = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
-        scene.add(nebula);
+        camera.position.z = 5;
 
-        // Black hole
-        const blackHoleGeometry = new THREE.SphereGeometry(5, 32, 32);
-        const blackHoleMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        const blackHole = new THREE.Mesh(blackHoleGeometry, blackHoleMaterial);
-        scene.add(blackHole);
-
-        // Event horizon
-        const eventHorizonGeometry = new THREE.RingGeometry(5, 7, 32);
-        const eventHorizonMaterial = new THREE.MeshBasicMaterial({ color: 0x4a00e0, side: THREE.DoubleSide });
-        const eventHorizon = new THREE.Mesh(eventHorizonGeometry, eventHorizonMaterial);
-        scene.add(eventHorizon);
-
-        camera.position.z = 50;
-
-        // Animation loop
+        // Animação da cena
         function animate() {
             requestAnimationFrame(animate);
-            starField.rotation.y += 0.0002;
-            nebula.rotation.y += 0.0005;
-            blackHole.rotation.y += 0.01;
-            eventHorizon.rotation.z += 0.02;
-            composer.render();
+            starField.rotation.y += 0.0005;
+            renderer.render(scene, camera);
         }
         animate();
 
-        // Loading progress
-        let progress = 0;
-        const progressBar = document.getElementById('progress-bar');
-        const brandContainer = document.getElementById('brand-container');
-
-        function updateProgress() {
-            if (progress < 100) {
-                progress += 1;
-                progressBar.style.width = `${progress}%`;
-                setTimeout(updateProgress, 40);  // 4000ms / 100 steps = 40ms per step
-            } else {
-                finishLoading();
+        // Efeito de partículas
+        particlesJS('scene-container', {
+            particles: {
+                number: { value: 100 },
+                color: { value: '#ffffff' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                move: { enable: true, speed: 1 }
             }
-        }
-
-        function finishLoading() {
-            whooshSound.play();
-            gsap.to(camera.position, {
-                z: 10,
-                duration: 2,
-                ease: 'power2.inOut'
-            });
-
-            gsap.to('#progress-container', {
-                opacity: 0,
-                duration: 0.5,
-                onComplete: () => {
-                    document.getElementById('progress-container').style.display = 'none';
-                }
-            });
-
-            gsap.to(brandContainer, {
-                opacity: 1,
-                duration: 1,
-                delay: 0.5,
-                ease: 'power2.inOut',
-                onStart: () => {
-                    impactSound.play();
-                },
-                onComplete: () => {
-                    createParticles();
-                }
-            });
-        }
-
-        // Particle effect
-        function createParticles() {
-            const particlesContainer = document.createElement('div');
-            particlesContainer.style.position = 'absolute';
-            particlesContainer.style.width = '100%';
-            particlesContainer.style.height = '100%';
-            particlesContainer.style.pointerEvents = 'none';
-            document.body.appendChild(particlesContainer);
-
-            for (let i = 0; i < 100; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.width = `${Math.random() * 5 + 2}px`;
-                particle.style.height = particle.style.width;
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                particlesContainer.appendChild(particle);
-
-                gsap.to(particle, {
-                    x: `${(Math.random() - 0.5) * 200}%`,
-                    y: `${(Math.random() - 0.5) * 200}%`,
-                    opacity: 0,
-                    duration: Math.random() * 2 + 1,
-                    ease: 'power2.out'
-                });
-            }
-        }
-
-        // Start loading
-        backgroundMusic.play();
-        updateProgress();
-
-        // Responsive design
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Mobile optimization
-        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            camera.position.z = 70;
-            document.getElementById('brand-name').style.fontSize = '48px';
-        }
+        // Áudio de fundo
+        const sound = new Howl({
+            src: ['https://example.com/path/to/space-ambience.mp3'],
+            loop: true,
+            volume: 0.5
+        });
+        sound.play();
+
+        // Efeito de inclinação nos formulários
+        $('.form-container').tilt({
+            maxTilt: 5,
+            perspective: 1000,
+            scale: 1.05,
+        });
+
+        // Animação de entrada dos formulários
+        anime({
+            targets: '.form-container',
+            translateY: [-50, 0],
+            opacity: [0, 1],
+            duration: 1000,
+            easing: 'easeOutElastic(1, .8)'
+        });
+
+        // Efeito de paralaxe no fundo
+        const scene = document.getElementById('scene-container');
+        const parallaxInstance = new Parallax(scene);
+
+        // Efeito de digitação no título
+        new Typed('#typed', {
+            strings: ['Login Cósmico', 'Explore o Universo'],
+            typeSpeed: 50,
+            backSpeed: 50,
+            loop: true
+        });
+
+        // Animação Lottie para ícones
+        const animation = lottie.loadAnimation({
+            container: document.getElementById('lottie-container'),
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: 'https://example.com/path/to/space-icon.json'
+        });
+
+        // Transições suaves entre formulários
+        barba.init({
+            transitions: [{
+                name: 'opacity-transition',
+                leave(data) {
+                    return gsap.to(data.current.container, {
+                        opacity: 0
+                    });
+                },
+                enter(data) {
+                    return gsap.from(data.next.container, {
+                        opacity: 0
+                    });
+                }
+            }]
+        });
+
+        // Toggle entre formulários
+        document.getElementById('showRegister').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        });
+
+        document.getElementById('showLogin').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+        });
+
+        // Adicione mais efeitos e interações aqui...
     </script>
 </body>
 </html>
-
