@@ -1,261 +1,112 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Cósmico</title>
+    <title>3D Solar System</title>
     <style>
-        /* Estilos base */
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-        }
-        #scene-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-        .form-container {
+        body { margin: 0; }
+        canvas { display: block; }
+        #info {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-            color: #fff;
-            max-width: 400px;
+            top: 10px;
             width: 100%;
-        }
-        .form-container h2 {
             text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        .input-group {
-            margin-bottom: 1rem;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 0.5rem;
-            border: none;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.2);
-            color: #fff;
-        }
-        .btn {
-            width: 100%;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 5px;
-            background: #4CAF50;
             color: white;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .btn:hover {
-            background: #45a049;
-        }
-        .toggle-form {
-            text-align: center;
-            margin-top: 1rem;
-        }
-        .toggle-form a {
-            color: #4CAF50;
-            text-decoration: none;
+            font-family: Arial, sans-serif;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
-    <div id="scene-container"></div>
-    
-    <div class="form-container" id="loginForm">
-        <h2>Login</h2>
-        <form>
-            <div class="input-group">
-                <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" required>
-            </div>
-            <div class="input-group">
-                <label for="loginPassword">Senha</label>
-                <input type="password" id="loginPassword" required>
-            </div>
-            <button type="submit" class="btn">Entrar</button>
-        </form>
-        <div class="toggle-form">
-            <a href="#" id="showRegister">Criar uma conta</a>
-        </div>
-    </div>
+<div id="info">Click and drag to rotate the solar system.</div>
+<script src="https://threejs.org/build/three.js"></script>
+<script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    <div class="form-container" id="registerForm" style="display: none;">
-        <h2>Cadastro</h2>
-        <form>
-            <div class="input-group">
-                <label for="registerName">Nome</label>
-                <input type="text" id="registerName" required>
-            </div>
-            <div class="input-group">
-                <label for="registerEmail">Email</label>
-                <input type="email" id="registerEmail" required>
-            </div>
-            <div class="input-group">
-                <label for="registerPassword">Senha</label>
-                <input type="password" id="registerPassword" required>
-            </div>
-            <button type="submit" class="btn">Cadastrar</button>
-        </form>
-        <div class="toggle-form">
-            <a href="#" id="showLogin">Já tenho uma conta</a>
-        </div>
-    </div>
+    const sunGeometry = new THREE.SphereGeometry(1, 32, 32);
+    const sunMaterial = new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/sun.jpg') });
+    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    scene.add(sun);
 
-    <!-- Bibliotecas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tilt.js/1.2.1/tilt.jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/parallax/3.1.0/parallax.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.14/lottie.min.js"></script>
-    <script src="https://unpkg.com/@barba/core"></script>
+    function createPlanet(radius, distanceFromSun, textureUrl, orbitalSpeed) {
+        const geometry = new THREE.SphereGeometry(radius, 32, 32);
+        const material = new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(textureUrl) });
+        const planet = new THREE.Mesh(geometry, material);
+        planet.distanceFromSun = distanceFromSun;
+        planet.orbitalSpeed = orbitalSpeed;
+        scene.add(planet);
+        return planet;
+    }
 
-    <script>
-        // Configuração da cena Three.js
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
+    const planetsData = [
+        { radius: 0.1, distance: 3, texture: 'https://threejs.org/examples/textures/mercury.jpg', speed: 0.04 },
+        { radius: 0.2, distance: 6, texture: 'https://threejs.org/examples/textures/venus.jpg', speed: 0.03 },
+        { radius: 0.3, distance: 9, texture: 'https://threejs.org/examples/textures/earth.jpg', speed: 0.02 },
+        { radius: 0.25, distance: 12, texture: 'https://threejs.org/examples/textures/mars.jpg', speed: 0.015 },
+        { radius: 0.8, distance: 18, texture: 'https://threejs.org/examples/textures/jupiter.jpg', speed: 0.01 },
+        { radius: 0.7, distance: 24, texture: 'https://threejs.org/examples/textures/saturn.jpg', speed: 0.008 },
+        { radius: 0.6, distance: 30, texture: 'https://threejs.org/examples/textures/uranus.jpg', speed: 0.006 },
+        { radius: 0.5, distance: 36, texture: 'https://threejs.org/examples/textures/neptune.jpg', speed: 0.004 }
+    ];
+
+    const planets = planetsData.map(data => createPlanet(data.radius, data.distance, data.texture, data.speed));
+
+    camera.position.z = 50;
+
+    const controls = new (function () {
+        this.rotationSpeed = 0.02;
+        this.autoRotate = true;
+    })();
+
+    const gui = new dat.GUI();
+    gui.add(controls, 'rotationSpeed', 0, 0.1);
+    gui.add(controls, 'autoRotate');
+
+    let mouseX = 0, mouseY = 0;
+    let targetX = 0, targetY = 0;
+    const windowHalfX = window.innerWidth / 2;
+    const windowHalfY = window.innerHeight / 2;
+
+    function onDocumentMouseMove(event) {
+        mouseX = event.clientX - windowHalfX;
+        mouseY = event.clientY - windowHalfY;
+    }
+
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        if (controls.autoRotate) {
+            sun.rotation.y += controls.rotationSpeed;
+            planets.forEach(planet => {
+                planet.rotation.y += controls.rotationSpeed;
+                planet.position.x = Math.cos(Date.now() * planet.orbitalSpeed / 1000) * planet.distanceFromSun;
+                planet.position.z = Math.sin(Date.now() * planet.orbitalSpeed / 1000) * planet.distanceFromSun;
+            });
+        } else {
+            targetX = mouseX * 0.01;
+            targetY = mouseY * 0.01;
+            sun.rotation.y += (targetX - sun.rotation.y) * 0.05;
+            sun.rotation.x += (targetY - sun.rotation.x) * 0.05;
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('scene-container').appendChild(renderer.domElement);
-
-        // Criação de estrelas
-        const starsGeometry = new THREE.BufferGeometry();
-        const starsMaterial = new THREE.PointsMaterial({color: 0xFFFFFF});
-
-        const starsVertices = [];
-        for (let i = 0; i < 10000; i++) {
-            const x = (Math.random() - 0.5) * 2000;
-            const y = (Math.random() - 0.5) * 2000;
-            const z = -Math.random() * 2000;
-            starsVertices.push(x, y, z);
-        }
-
-        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
-        const starField = new THREE.Points(starsGeometry, starsMaterial);
-        scene.add(starField);
-
-        camera.position.z = 5;
-
-        // Animação da cena
-        function animate() {
-            requestAnimationFrame(animate);
-            starField.rotation.y += 0.0005;
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // Efeito de partículas
-        particlesJS('scene-container', {
-            particles: {
-                number: { value: 100 },
-                color: { value: '#ffffff' },
-                shape: { type: 'circle' },
-                opacity: { value: 0.5, random: true },
-                size: { value: 3, random: true },
-                move: { enable: true, speed: 1 }
-            }
-        });
-
-        // Áudio de fundo
-        const sound = new Howl({
-            src: ['https://example.com/path/to/space-ambience.mp3'],
-            loop: true,
-            volume: 0.5
-        });
-        sound.play();
-
-        // Efeito de inclinação nos formulários
-        $('.form-container').tilt({
-            maxTilt: 5,
-            perspective: 1000,
-            scale: 1.05,
-        });
-
-        // Animação de entrada dos formulários
-        anime({
-            targets: '.form-container',
-            translateY: [-50, 0],
-            opacity: [0, 1],
-            duration: 1000,
-            easing: 'easeOutElastic(1, .8)'
-        });
-
-        // Efeito de paralaxe no fundo
-        const scene = document.getElementById('scene-container');
-        const parallaxInstance = new Parallax(scene);
-
-        // Efeito de digitação no título
-        new Typed('#typed', {
-            strings: ['Login Cósmico', 'Explore o Universo'],
-            typeSpeed: 50,
-            backSpeed: 50,
-            loop: true
-        });
-
-        // Animação Lottie para ícones
-        const animation = lottie.loadAnimation({
-            container: document.getElementById('lottie-container'),
-            renderer: 'svg',
-            loop: true,
-            autoplay: true,
-            path: 'https://example.com/path/to/space-icon.json'
-        });
-
-        // Transições suaves entre formulários
-        barba.init({
-            transitions: [{
-                name: 'opacity-transition',
-                leave(data) {
-                    return gsap.to(data.current.container, {
-                        opacity: 0
-                    });
-                },
-                enter(data) {
-                    return gsap.from(data.next.container, {
-                        opacity: 0
-                    });
-                }
-            }]
-        });
-
-        // Toggle entre formulários
-        document.getElementById('showRegister').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'block';
-        });
-
-        document.getElementById('showLogin').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('loginForm').style.display = 'block';
-        });
-
-        // Adicione mais efeitos e interações aqui...
-    </script>
+    }, false);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
 </body>
 </html>
