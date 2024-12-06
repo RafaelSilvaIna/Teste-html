@@ -1,112 +1,263 @@
-<!DOCTYPE html>
-<html lang="en">
+
+
+
+<!doctype html>
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Solar System</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-        #info {
-            position: absolute;
-            top: 10px;
-            width: 100%;
-            text-align: center;
-            color: white;
-            font-family: Arial, sans-serif;
-            z-index: 10;
-        }
-    </style>
+  <script>
+    var siga_version = 'None'
+
+    if (localStorage.siga_version != siga_version) {
+      localStorage.setItem('siga_version', siga_version)
+    }
+  </script>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="google-site-verification" content="8ZIjvqt_JNn2mOW7bCH5D9d95Cil84ib_Jolx4Xo46k" />
+  <meta name="clarity-site-verification" content="71597388-4427-48e4-8a26-f89e1a856603" />
+
+  <title>Activesoft - Entrar</title>
+
+  <link rel="manifest" href="https://cdn.siga.activesoft.com.br/siga-producao/manifest.json" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="57x57" href="https://cdn.siga.activesoft.com.br/siga-producao/icones/login/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="https://cdn.siga.activesoft.com.br/siga-producao/icones/login/android-chrome-192x192.png" sizes="196x196" />
+  <link rel="icon" type="image/png" href="https://cdn.siga.activesoft.com.br/siga-producao/icones/login/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="https://cdn.siga.activesoft.com.br/siga-producao/icones/login/favicon-16x16.png" sizes="16x16" />
+  
+
+  <meta name="application-name" content="Activesoft Gest&atilde;o Acad&ecirc;mica" />
+
+  <meta name="msapplication-TileColor" content="#FFFFFF" />
+  <meta name="msapplication-TileImage" content="https://cdn.siga.activesoft.com.br/siga-producao/icones/mstile-144x144.png" />
+  <meta name="msapplication-square70x70logo" content="https://cdn.siga.activesoft.com.br/siga-producao/icones/mstile-70x70.png" />
+  <meta name="msapplication-square150x150logo" content="https://cdn.siga.activesoft.com.br/siga-producao/icones/mstile-150x150.png" />
+  <meta name="msapplication-wide310x150logo" content="https://cdn.siga.activesoft.com.br/siga-producao/icones/mstile-310x150.png" />
+  <meta name="msapplication-square310x310logo" content="https://cdn.siga.activesoft.com.br/siga-producao/icones/mstile-310x310.png" />
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+        type="text/css"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:300,500,700,800"
+        type="text/css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900"
+        type="text/css" />
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap">
+  <link rel="stylesheet" href="https://cdn.siga.activesoft.com.br/siga-producao/bootstrap_v4.6.0.css" type="text/css" data-estilo-novo  crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.siga.activesoft.com.br/siga-producao/font-awesome-4.7.0/css/font-awesome.min.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.siga.activesoft.com.br/siga-producao/legado.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.siga.activesoft.com.br/siga-producao/icomoon/styles.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.siga.activesoft.com.br/siga-producao/ladda-themeless.min.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.siga.activesoft.com.br/siga-producao/login_style.css" type="text/css"/>
+
+  <style>
+    .swal2-container-ux {
+      z-index: 2147483647 !important;
+    }
+  </style>
 </head>
+
 <body>
-<div id="info">Click and drag to rotate the solar system.</div>
-<script src="https://threejs.org/build/three.js"></script>
-<script>
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+  
+  <div class='layout_login'>
+    <div class='layout_login_wrappers__background'>
+    </div>
 
-    const sunGeometry = new THREE.SphereGeometry(1, 32, 32);
-    const sunMaterial = new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/sun.jpg') });
-    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-    scene.add(sun);
+    <div class='layout_login_wrappers__content'>
+      
+  <form class="login_form" method="POST" autocomplete="on">
+    <input type="hidden" name="csrfmiddlewaretoken" value="fltJoLsUCCAMRzz7n0sDwtiB4CcXodSumR6k51qU23mAThS4Ez26LFx3eE1hVhh1">
+    <div>
+      <div class="login_form_header">
+        
+          <img
+            src="https://cdn.siga.activesoft.com.br/siga-producao/logo_brand_activesoft_completa.png"
+            style="width: 250px; margin-bottom: 64px;"
+            alt="Activesoft"
+          >
+        
 
-    function createPlanet(radius, distanceFromSun, textureUrl, orbitalSpeed) {
-        const geometry = new THREE.SphereGeometry(radius, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(textureUrl) });
-        const planet = new THREE.Mesh(geometry, material);
-        planet.distanceFromSun = distanceFromSun;
-        planet.orbitalSpeed = orbitalSpeed;
-        scene.add(planet);
-        return planet;
+        <div class="login_form_header__title">
+          <h1>Fazer login</h1>
+          
+        </div>
+      </div>
+
+      
+        <div class="form-group">
+          <label for="id_codigo" class="login_form_label">
+            Instituição
+          </label>
+          <div class="login_form_input_wrap">
+            <input type="text" name="codigo" id="codigoInstituicao" class="login_form_input" placeholder="Digite o código da instituição..." maxlength="50" required>
+          </div>
+        </div>
+      
+
+      
+
+      <div class="form-group">
+        <label for="id_login" class="login_form_label">
+          Login
+        </label>
+        <div class="login_form_input_wrap">
+          <input type="text" name="login" class="login_form_input" placeholder="Digite seu login..." autocomplete="username" required id="id_login">
+          <script>
+            if (localStorage.ultimaInstituicao) {
+              document.querySelector('#codigoInstituicao').value = localStorage.ultimaInstituicao
+              document.querySelector('#id_login').focus()
+            }
+          </script>
+        </div>
+        
+      </div>
+
+      <div class="form-group">
+        <label for="id_senha" class="login_form_label">
+          Senha
+        </label>
+
+        <div class="login_form_input_wrap">
+          <input type="password" name="senha" class="login_form_input" placeholder="Digite sua senha..." required id="id_senha">
+        </div>
+
+        
+
+        
+      </div>
+
+      <!-- ***************************************************** -->
+
+      
+
+      <div class="login_form_button__wrap">
+        <button
+          class="login_form_button login_form_button__primary"
+          data-cy="botao-login"
+        >
+          Entrar
+        </button>
+
+        <button
+          class="login_form_button__link"
+          onclick="abreLink(event);"
+        >
+          Esqueci meu login ou senha
+        </button>
+
+        
+      </div>
+    </div>
+  </form>
+
+    </div>
+  </div>
+
+
+  
+  
+
+  <script src="https://cdn.siga.activesoft.com.br/siga-producao/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.siga.activesoft.com.br/siga-producao/bootstrap.bundle.min.js"></script>
+
+  
+  
+
+  <script type="text/javascript">
+    const campoInstituicao = document.querySelector('#codigoInstituicao')
+    const loginForm = document.querySelector('.login_form')
+
+    loginForm.addEventListener('submit', () => {
+      if (campoInstituicao) {
+        localStorage.setItem('ultimaInstituicao', String(campoInstituicao.value).toUpperCase())
+      }
+    })
+  </script>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      var sigla_unidade = ''
+      var usuario = ''
+
+      if (sigla_unidade) {
+        $('#codigoInstituicao').val(sigla_unidade)
+      }
+
+      if (usuario) {
+        $('#id_login').val(usuario)
+      }
+
+      if (sigla_unidade && usuario) {
+        $('#id_senha').focus()
+      }
+
+      var sigla_unidade = ''
+
+      var ensino_superior = '' == 'True'
+      var inscricao_eventos_exibe_link_externo = '' == 'True'
+      var inscricao_eventos_link_externo_hash = ''
+      var acervo_biblioteca_exibe_link_externo = '' == 'True'
+
+      if (sigla_unidade && ensino_superior && inscricao_eventos_exibe_link_externo) {
+        $('#inscricao_eventos_exibe_link_externo')[0].href = `https://app2.activesoft.com.br/sistema/loginDiretoInscricaoEvento.asp?p=${sigla_unidade}&h=${inscricao_eventos_link_externo_hash}`
+      }
+
+      if (sigla_unidade && ensino_superior && acervo_biblioteca_exibe_link_externo) {
+        $('#acervo_biblioteca_exibe_link_externo')[0].href = `http://app2.activesoft.com.br/sistema/entrar.asp?p=${sigla_unidade}&AcessoAnonimo=1`
+      }
+    })
+
+    document.addEventListener('DOMContentLoaded', function () {
+      window.localStorage.removeItem('alunoAvaliacaoPendente@Sigaweb')
+      window.localStorage.removeItem('avisoBloqueio')
+      window.localStorage.removeItem('pesquisaNPS')
+    })
+
+    function abreLink (event) {
+      event.preventDefault()
+      const instituicaoDoCampo = document.getElementById("codigoInstituicao")?.value
+      const instituicaoDoParametro = Object.fromEntries(new URLSearchParams(window.location.search).entries())?.instituicao
+      const instituicaoParaRecuperacao = instituicaoDoCampo || instituicaoDoParametro
+
+      if (!instituicaoParaRecuperacao ) {
+        alert('O campo instituição é necessário para o processo de recuperar senha')
+        return
+      }
+      window.location.href = "/recuperar_senha/?instituicao=" + instituicaoParaRecuperacao
     }
 
-    const planetsData = [
-        { radius: 0.1, distance: 3, texture: 'https://threejs.org/examples/textures/mercury.jpg', speed: 0.04 },
-        { radius: 0.2, distance: 6, texture: 'https://threejs.org/examples/textures/venus.jpg', speed: 0.03 },
-        { radius: 0.3, distance: 9, texture: 'https://threejs.org/examples/textures/earth.jpg', speed: 0.02 },
-        { radius: 0.25, distance: 12, texture: 'https://threejs.org/examples/textures/mars.jpg', speed: 0.015 },
-        { radius: 0.8, distance: 18, texture: 'https://threejs.org/examples/textures/jupiter.jpg', speed: 0.01 },
-        { radius: 0.7, distance: 24, texture: 'https://threejs.org/examples/textures/saturn.jpg', speed: 0.008 },
-        { radius: 0.6, distance: 30, texture: 'https://threejs.org/examples/textures/uranus.jpg', speed: 0.006 },
-        { radius: 0.5, distance: 36, texture: 'https://threejs.org/examples/textures/neptune.jpg', speed: 0.004 }
-    ];
+    function abreLinkFilantropia (event) {
+      event.preventDefault()
+      const instituicaoDoCampo = document.getElementById("codigoInstituicao")?.value
+      const instituicaoDoParametro = Object.fromEntries(new URLSearchParams(window.location.search).entries())?.instituicao
+      const instituicaoParaRecuperacao = instituicaoDoCampo || instituicaoDoParametro
 
-    const planets = planetsData.map(data => createPlanet(data.radius, data.distance, data.texture, data.speed));
-
-    camera.position.z = 50;
-
-    const controls = new (function () {
-        this.rotationSpeed = 0.02;
-        this.autoRotate = true;
-    })();
-
-    const gui = new dat.GUI();
-    gui.add(controls, 'rotationSpeed', 0, 0.1);
-    gui.add(controls, 'autoRotate');
-
-    let mouseX = 0, mouseY = 0;
-    let targetX = 0, targetY = 0;
-    const windowHalfX = window.innerWidth / 2;
-    const windowHalfY = window.innerHeight / 2;
-
-    function onDocumentMouseMove(event) {
-        mouseX = event.clientX - windowHalfX;
-        mouseY = event.clientY - windowHalfY;
+      if (!instituicaoParaRecuperacao) {
+        alert('O campo instituição é necessário para o processo de recuperar senha')
+        return
+      }
+      window.location.href = "/cadastrar_filantropia?instituicao=" + instituicaoParaRecuperacao
     }
+    function abreLinkFichaInscricao (event) {
+      event.preventDefault()
+      if (document.getElementById("id_codigo").value == '') {
+        alert('O campo instituição é necessário para o processo inscricao')
+        return
+      }
 
-    document.addEventListener('mousemove', onDocumentMouseMove, false);
+      var matricula_online_rota_sigaweb = '' == 'True'
 
-    function animate() {
-        requestAnimationFrame(animate);
-
-        if (controls.autoRotate) {
-            sun.rotation.y += controls.rotationSpeed;
-            planets.forEach(planet => {
-                planet.rotation.y += controls.rotationSpeed;
-                planet.position.x = Math.cos(Date.now() * planet.orbitalSpeed / 1000) * planet.distanceFromSun;
-                planet.position.z = Math.sin(Date.now() * planet.orbitalSpeed / 1000) * planet.distanceFromSun;
-            });
-        } else {
-            targetX = mouseX * 0.01;
-            targetY = mouseY * 0.01;
-            sun.rotation.y += (targetX - sun.rotation.y) * 0.05;
-            sun.rotation.x += (targetY - sun.rotation.x) * 0.05;
-        }
-
-        renderer.render(scene, camera);
+      if (matricula_online_rota_sigaweb) {
+        window.location.href = "/ficha_inscricao_novatos?instituicao=" + document.getElementById("id_codigo").value
+      } else {
+        window.open("http://app2.activesoft.com.br/sistema/entrar.asp?p=" + document.getElementById("id_codigo").value + "&Reserva=1", "_self")
+      }
     }
+  </script>
 
-    animate();
 
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }, false);
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+
 </body>
 </html>
