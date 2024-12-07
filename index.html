@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stress CPU</title>
+    <title>Advanced CPU Stress Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,46 +14,82 @@
         button {
             padding: 10px 20px;
             font-size: 16px;
+            margin: 10px;
             cursor: pointer;
         }
         #status {
             margin-top: 20px;
             font-size: 18px;
         }
+        #monitor {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #555;
+        }
     </style>
 </head>
 <body>
-    <h1>Stress Test CPU</h1>
+    <h1>Advanced CPU Stress Test</h1>
     <button onclick="startStress()">Start Stress</button>
     <button onclick="stopStress()">Stop Stress</button>
     <div id="status">Status: Idle</div>
+    <div id="monitor">CPU Usage: Monitoring...</div>
 
     <script>
         let workers = [];
         const numWorkers = navigator.hardwareConcurrency || 4;
+        let monitorInterval = null;
 
         function startStress() {
             document.getElementById('status').innerText = `Status: Stressing CPU with ${numWorkers} threads...`;
 
             stopStress(); // Stop existing workers, if any
+
+            // Create and start workers
             for (let i = 0; i < numWorkers; i++) {
                 const worker = new Worker(URL.createObjectURL(new Blob([`
                     self.onmessage = function() {
                         while (true) {
-                            Math.sqrt(Math.random() * 1000000);
+                            for (let i = 0; i < 1e7; i++) {
+                                Math.sin(i) * Math.cos(i);
+                            }
                         }
                     };
                 `], { type: 'application/javascript' })));
                 worker.postMessage('start');
                 workers.push(worker);
             }
+
+            // Start monitoring system usage
+            monitorSystem();
         }
 
         function stopStress() {
             document.getElementById('status').innerText = 'Status: Idle';
+
+            // Terminate all workers
             workers.forEach(worker => worker.terminate());
             workers = [];
+
+            // Stop monitoring
+            if (monitorInterval) {
+                clearInterval(monitorInterval);
+                monitorInterval = null;
+            }
+            document.getElementById('monitor').innerText = 'CPU Usage: Monitoring stopped.';
         }
+
+        function monitorSystem() {
+            if (monitorInterval) return; // Prevent multiple intervals
+
+            monitorInterval = setInterval(() => {
+                const cpuUsage = Math.min(100, Math.random() * 20 + 80).toFixed(2); // Simulated CPU usage
+                document.getElementById('monitor').innerText = `CPU Usage: ${cpuUsage}% (Simulated)`;
+            }, 1000);
+        }
+
+        // Ensure workers are terminated when the page is closed or reloaded
+        window.addEventListener('beforeunload', stopStress);
     </script>
 </body>
 </html>
