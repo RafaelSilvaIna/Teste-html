@@ -1,236 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realistic Galaxy Simulation</title>
+    <title>Gerenciador de Tarefas</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-        }
-        #galaxy-container {
-            width: 100%;
-            height: 100%;
-        }
-        #fps {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            color: white;
+        body {
             font-family: Arial, sans-serif;
-            font-size: 14px;
-            z-index: 100;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #todo-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        #todo-list li {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #todo-list li.completed {
+            background-color: #e8f5e9;
+        }
+        button {
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
-    <div id="fps"></div>
-    <div id="galaxy-container"></div>
+    <h1>Gerenciador de Tarefas</h1>
+    
+    <form id="add-todo-form">
+        <input type="text" id="title" placeholder="Título" required>
+        <input type="text" id="description" placeholder="Descrição" required>
+        <button type="submit">Adicionar Tarefa</button>
+    </form>
 
-    <!-- Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- OrbitControls -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/controls/OrbitControls.min.js"></script>
-    <!-- Tween.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
-    <!-- Howler.js for sound -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
-    <!-- Perlin Noise -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
-    <!-- EffectComposer -->
-    <script src="https://threejs.org/examples/js/postprocessing/EffectComposer.js"></script>
-    <!-- RenderPass -->
-    <script src="https://threejs.org/examples/js/postprocessing/RenderPass.js"></script>
-    <!-- UnrealBloomPass -->
-    <script src="https://threejs.org/examples/js/postprocessing/UnrealBloomPass.js"></script>
-    <!-- FilmPass -->
-    <script src="https://threejs.org/examples/js/postprocessing/FilmPass.js"></script>
+    <ul id="todo-list"></ul>
 
     <script>
-        // Galaxy Simulation
-let scene, camera, renderer, controls, composer;
-let stars = [], planets = [], nebulae = [];
-let clock = new THREE.Clock();
-let simplex = new SimplexNoise();
+        const API_URL = 'http://127.0.0.1:8000/';
 
-// Sound
-const sound = new Howl({
-    src: ['https://freesound.org/data/previews/417/417486_5121236-lq.mp3'],
-    loop: true,
-    volume: 0.5
-});
-
-function init() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 50;
-
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    document.getElementById('galaxy-container').appendChild(renderer.domElement);
-
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-
-    // Create Galaxy
-    createStars();
-    createPlanets();
-    createNebulae();
-
-    // Post-processing
-    composer = new THREE.EffectComposer(renderer);
-    const renderPass = new THREE.RenderPass(scene, camera);
-    composer.addPass(renderPass);
-
-    const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-    composer.addPass(bloomPass);
-
-    const filmPass = new THREE.FilmPass(0.35, 0.5, 2048, false);
-    composer.addPass(filmPass);
-
-    // Event Listeners
-    window.addEventListener('resize', onWindowResize, false);
-
-    // Start animation
-    animate();
-
-    // Play sound
-    sound.play();
-}
-
-function createStars() {
-    const geometry = new THREE.BufferGeometry();
-    const vertices = [];
-    const sizes = [];
-
-    for (let i = 0; i < 10000; i++) {
-        const x = THREE.MathUtils.randFloatSpread(2000);
-        const y = THREE.MathUtils.randFloatSpread(2000);
-        const z = THREE.MathUtils.randFloatSpread(2000);
-        vertices.push(x, y, z);
-
-        sizes.push(THREE.MathUtils.randFloat(1, 3));
-    }
-
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
-
-    const material = new THREE.PointsMaterial({
-        color: 0xffffff,
-        sizeAttenuation: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-        vertexColors: true
-    });
-
-    const starField = new THREE.Points(geometry, material);
-    scene.add(starField);
-}
-
-function createPlanets() {
-    const planetGeometry = new THREE.SphereGeometry(1, 32, 32);
-    
-    for (let i = 0; i < 5; i++) {
-        const planetMaterial = new THREE.MeshPhongMaterial({
-            color: Math.random() * 0xffffff,
-            shininess: 0.5,
-            specular: 0xffffff,
-            emissive: 0x000000
-        });
-
-        const planet = new THREE.Mesh(planetGeometry, planetMaterial);
-        planet.position.set(
-            THREE.MathUtils.randFloatSpread(100),
-            THREE.MathUtils.randFloatSpread(100),
-            THREE.MathUtils.randFloatSpread(100)
-        );
-        planet.scale.setScalar(THREE.MathUtils.randFloat(1, 5));
-        scene.add(planet);
-        planets.push(planet);
-    }
-}
-
-function createNebulae() {
-    const nebulaGeometry = new THREE.BufferGeometry();
-    const nebulaVertices = [];
-    const nebulaColors = [];
-
-    for (let i = 0; i < 5000; i++) {
-        const x = THREE.MathUtils.randFloatSpread(500);
-        const y = THREE.MathUtils.randFloatSpread(500);
-        const z = THREE.MathUtils.randFloatSpread(500);
-        nebulaVertices.push(x, y, z);
-
-        const r = Math.random();
-        const g = Math.random();
-        const b = Math.random();
-        nebulaColors.push(r, g, b);
-    }
-
-    nebulaGeometry.setAttribute('position', new THREE.Float32BufferAttribute(nebulaVertices, 3));
-    nebulaGeometry.setAttribute('color', new THREE.Float32BufferAttribute(nebulaColors, 3));
-
-    const nebulaMaterial = new THREE.PointsMaterial({
-        size: 3,
-        transparent: true,
-        opacity: 0.8,
-        vertexColors: true,
-        blending: THREE.AdditiveBlending,
-        sizeAttenuation: true
-    });
-
-    const nebula = new THREE.Points(nebulaGeometry, nebulaMaterial);
-    scene.add(nebula);
-    nebulae.push(nebula);
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-
-    const delta = clock.getDelta();
-
-    // Rotate planets
-    planets.forEach(planet => {
-        planet.rotation.y += 0.01 * delta;
-    });
-
-    // Animate nebulae
-    nebulae.forEach(nebula => {
-        const positions = nebula.geometry.attributes.position.array;
-        for (let i = 0; i < positions.length; i += 3) {
-            positions[i] += simplex.noise3D(positions[i], positions[i+1], positions[i+2]) * 0.1;
-            positions[i+1] += simplex.noise3D(positions[i], positions[i+1], positions[i+2]) * 0.1;
-            positions[i+2] += simplex.noise3D(positions[i], positions[i+1], positions[i+2]) * 0.1;
+        // Função para carregar todas as tarefas
+        async function loadTodos() {
+            const response = await fetch(`${API_URL}/todos/`);
+            const todos = await response.json();
+            const todoList = document.getElementById('todo-list');
+            todoList.innerHTML = '';
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${todo.title} - ${todo.description}</span>
+                    <div>
+                        <button onclick="toggleTodo(${todo.id}, ${!todo.completed})">
+                            ${todo.completed ? 'Desmarcar' : 'Marcar'}
+                        </button>
+                        <button onclick="deleteTodo(${todo.id})">Excluir</button>
+                    </div>
+                `;
+                if (todo.completed) {
+                    li.classList.add('completed');
+                }
+                todoList.appendChild(li);
+            });
         }
-        nebula.geometry.attributes.position.needsUpdate = true;
-    });
 
-    controls.update();
-    composer.render();
+        // Função para adicionar uma nova tarefa
+        async function addTodo(event) {
+            event.preventDefault();
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const response = await fetch(`${API_URL}/todos/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, description }),
+            });
+            if (response.ok) {
+                document.getElementById('title').value = '';
+                document.getElementById('description').value = '';
+                loadTodos();
+            }
+        }
 
-    // Update FPS counter
-    document.getElementById('fps').textContent = `FPS: ${Math.round(1 / delta)}`;
-}
+        // Função para marcar/desmarcar uma tarefa como concluída
+        async function toggleTodo(id, completed) {
+            const response = await fetch(`${API_URL}/todos/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ completed }),
+            });
+            if (response.ok) {
+                loadTodos();
+            }
+        }
 
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
-}
+        // Função para excluir uma tarefa
+        async function deleteTodo(id) {
+            const response = await fetch(`${API_URL}/todos/${id}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                loadTodos();
+            }
+        }
 
-init();
+        // Adicionar evento de submit ao formulário
+        document.getElementById('add-todo-form').addEventListener('submit', addTodo);
 
-
+        // Carregar tarefas ao iniciar a página
+        loadTodos();
     </script>
 </body>
 </html>
