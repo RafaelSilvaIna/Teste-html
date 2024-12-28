@@ -1,122 +1,150 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Tarefas</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        #todo-list {
-            list-style-type: none;
-            padding: 0;
-        }
-        #todo-list li {
-            margin-bottom: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        #todo-list li.completed {
-            background-color: #e8f5e9;
-        }
-        button {
-            margin-left: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa de Assentos</title>
+
+  <!-- CSS do Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <!-- Estilo Personalizado -->
+  <style>
+    .seat-map {
+      display: grid;
+      grid-template-columns: repeat(10, 40px); /* 10 assentos por linha */
+      gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+
+    .seat {
+      width: 40px;
+      height: 40px;
+      border-radius: 5px;
+      text-align: center;
+      line-height: 40px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .available {
+      background-color: green;
+      color: white;
+    }
+
+    .selected {
+      background-color: brown;
+      color: white;
+    }
+
+    .reserved {
+      background-color: gray;
+      color: white;
+      cursor: not-allowed;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .legend-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+      margin-right: 5px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Gerenciador de Tarefas</h1>
-    
-    <form id="add-todo-form">
-        <input type="text" id="title" placeholder="Título" required>
-        <input type="text" id="description" placeholder="Descrição" required>
-        <button type="submit">Adicionar Tarefa</button>
-    </form>
+  <div class="container">
+    <h1 class="text-center mt-4">Mapa de Assentos</h1>
 
-    <ul id="todo-list"></ul>
+    <!-- Legenda -->
+    <div class="legend">
+      <div class="d-flex align-items-center">
+        <div class="legend-box available"></div> Disponível
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="legend-box selected"></div> Selecionado
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="legend-box reserved"></div> Reservado
+      </div>
+    </div>
 
-    <script>
-        const API_URL = 'http://127.0.0.1:8000';
+    <!-- Mapa de Assentos -->
+    <div class="seat-map" id="seatMap"></div>
 
-        // Função para carregar todas as tarefas
-        async function loadTodos() {
-            const response = await fetch(`${API_URL}/todos/`);
-            const todos = await response.json();
-            const todoList = document.getElementById('todo-list');
-            todoList.innerHTML = '';
-            todos.forEach(todo => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span>${todo.title} - ${todo.description}</span>
-                    <div>
-                        <button onclick="toggleTodo(${todo.id}, ${!todo.completed})">
-                            ${todo.completed ? 'Desmarcar' : 'Marcar'}
-                        </button>
-                        <button onclick="deleteTodo(${todo.id})">Excluir</button>
-                    </div>
-                `;
-                if (todo.completed) {
-                    li.classList.add('completed');
-                }
-                todoList.appendChild(li);
-            });
+    <!-- Botão para Reservar -->
+    <div class="text-center mt-4">
+      <button id="reserveSeats" class="btn btn-primary">Reservar Selecionados</button>
+    </div>
+  </div>
+
+  <!-- Bibliotecas JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Dados dos assentos
+    const seatData = [
+      { id: "A1", status: "available" },
+      { id: "A2", status: "reserved" },
+      { id: "A3", status: "available" },
+      { id: "A4", status: "available" },
+      { id: "A5", status: "reserved" },
+      { id: "A6", status: "available" },
+      { id: "A7", status: "available" },
+      { id: "A8", status: "selected" },
+      { id: "A9", status: "available" },
+      { id: "A10", status: "available" },
+      // Adicione mais assentos conforme necessário
+    ];
+
+    // Função para renderizar os assentos
+    function renderSeats() {
+      const $seatMap = $("#seatMap");
+      $seatMap.empty();
+
+      seatData.forEach((seat) => {
+        const $seat = $(`<div class="seat ${seat.status}" id="${seat.id}">${seat.id}</div>`);
+
+        // Adicionar evento de clique (exceto para reservados)
+        if (seat.status !== "reserved") {
+          $seat.on("click", function () {
+            // Alternar entre 'selected' e 'available'
+            seat.status = seat.status === "available" ? "selected" : "available";
+            renderSeats(); // Atualizar a interface
+          });
         }
 
-        // Função para adicionar uma nova tarefa
-        async function addTodo(event) {
-            event.preventDefault();
-            const title = document.getElementById('title').value;
-            const description = document.getElementById('description').value;
-            const response = await fetch(`${API_URL}/todos/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ title, description }),
-            });
-            if (response.ok) {
-                document.getElementById('title').value = '';
-                document.getElementById('description').value = '';
-                loadTodos();
-            }
+        $seatMap.append($seat);
+      });
+    }
+
+    // Botão para reservar assentos selecionados
+    $("#reserveSeats").on("click", function () {
+      seatData.forEach((seat) => {
+        if (seat.status === "selected") {
+          seat.status = "reserved"; // Altera status para reservado
         }
+      });
+      alert("Assentos selecionados foram reservados!");
+      renderSeats(); // Atualizar o mapa
+    });
 
-        // Função para marcar/desmarcar uma tarefa como concluída
-        async function toggleTodo(id, completed) {
-            const response = await fetch(`${API_URL}/todos/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ completed }),
-            });
-            if (response.ok) {
-                loadTodos();
-            }
-        }
-
-        // Função para excluir uma tarefa
-        async function deleteTodo(id) {
-            const response = await fetch(`${API_URL}/todos/${id}`, {
-                method: 'DELETE',
-            });
-            if (response.ok) {
-                loadTodos();
-            }
-        }
-
-        // Adicionar evento de submit ao formulário
-        document.getElementById('add-todo-form').addEventListener('submit', addTodo);
-
-        // Carregar tarefas ao iniciar a página
-        loadTodos();
-    </script>
+    // Renderizar os assentos na inicialização
+    $(document).ready(function () {
+      renderSeats();
+    });
+  </script>
 </body>
 </html>
