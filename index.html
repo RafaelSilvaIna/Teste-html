@@ -1,150 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mapa de Assentos</title>
-
-  <!-- CSS do Bootstrap -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  >
-
-  <!-- Estilo Personalizado -->
-  <style>
-    .seat-map {
-      display: grid;
-      grid-template-columns: repeat(10, 40px); /* 10 assentos por linha */
-      gap: 10px;
-      justify-content: center;
-      margin: 20px auto;
-    }
-
-    .seat {
-      width: 40px;
-      height: 40px;
-      border-radius: 5px;
-      text-align: center;
-      line-height: 40px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .available {
-      background-color: green;
-      color: white;
-    }
-
-    .selected {
-      background-color: brown;
-      color: white;
-    }
-
-    .reserved {
-      background-color: gray;
-      color: white;
-      cursor: not-allowed;
-    }
-
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    .legend-box {
-      width: 20px;
-      height: 20px;
-      border-radius: 3px;
-      margin-right: 5px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumindo API - Hello World</title>
 </head>
 <body>
-  <div class="container">
-    <h1 class="text-center mt-4">Mapa de Assentos</h1>
+    <h1>Consumindo a API "Hello World"</h1>
+    <button id="fetchData">Buscar Mensagem</button>
+    <p id="response"></p>
 
-    <!-- Legenda -->
-    <div class="legend">
-      <div class="d-flex align-items-center">
-        <div class="legend-box available"></div> Disponível
-      </div>
-      <div class="d-flex align-items-center">
-        <div class="legend-box selected"></div> Selecionado
-      </div>
-      <div class="d-flex align-items-center">
-        <div class="legend-box reserved"></div> Reservado
-      </div>
-    </div>
-
-    <!-- Mapa de Assentos -->
-    <div class="seat-map" id="seatMap"></div>
-
-    <!-- Botão para Reservar -->
-    <div class="text-center mt-4">
-      <button id="reserveSeats" class="btn btn-primary">Reservar Selecionados</button>
-    </div>
-  </div>
-
-  <!-- Bibliotecas JS -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    // Dados dos assentos
-    const seatData = [
-      { id: "A1", status: "available" },
-      { id: "A2", status: "reserved" },
-      { id: "A3", status: "available" },
-      { id: "A4", status: "available" },
-      { id: "A5", status: "reserved" },
-      { id: "A6", status: "available" },
-      { id: "A7", status: "available" },
-      { id: "A8", status: "selected" },
-      { id: "A9", status: "available" },
-      { id: "A10", status: "available" },
-      // Adicione mais assentos conforme necessário
-    ];
-
-    // Função para renderizar os assentos
-    function renderSeats() {
-      const $seatMap = $("#seatMap");
-      $seatMap.empty();
-
-      seatData.forEach((seat) => {
-        const $seat = $(`<div class="seat ${seat.status}" id="${seat.id}">${seat.id}</div>`);
-
-        // Adicionar evento de clique (exceto para reservados)
-        if (seat.status !== "reserved") {
-          $seat.on("click", function () {
-            // Alternar entre 'selected' e 'available'
-            seat.status = seat.status === "available" ? "selected" : "available";
-            renderSeats(); // Atualizar a interface
-          });
-        }
-
-        $seatMap.append($seat);
-      });
-    }
-
-    // Botão para reservar assentos selecionados
-    $("#reserveSeats").on("click", function () {
-      seatData.forEach((seat) => {
-        if (seat.status === "selected") {
-          seat.status = "reserved"; // Altera status para reservado
-        }
-      });
-      alert("Assentos selecionados foram reservados!");
-      renderSeats(); // Atualizar o mapa
-    });
-
-    // Renderizar os assentos na inicialização
-    $(document).ready(function () {
-      renderSeats();
-    });
-  </script>
+    <script>
+        document.getElementById('fetchData').addEventListener('click', async () => {
+            try {
+                // Faz a requisição para a API local
+                const response = await fetch('http://localhost:3000/');
+                const data = await response.text();
+                
+                // Exibe a resposta no parágrafo
+                document.getElementById('response').innerText = data;
+            } catch (error) {
+                document.getElementById('response').innerText = 'Erro ao conectar com a API.';
+                console.error('Erro:', error);
+            }
+        });
+    </script>
 </body>
 </html>
