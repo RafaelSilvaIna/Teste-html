@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhotoFeed v1.30.0</title>
+    <title>PhotoFeed v2.0.0</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glider-js/glider.min.css" />
     <style>
@@ -11,37 +11,110 @@
             background-color: #1a202c;
             color: #e2e8f0;
         }
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+        @media (min-width: 768px) {
+            .sidebar.closed {
+                transform: translateX(0);
+            }
+        }
+        .infinite-scroll-loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50px;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
-    <div id="app" class="max-w-4xl mx-auto p-4">
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">PhotoFeed</h1>
-            <div class="flex items-center space-x-4">
-                <button id="themeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
-                    <i data-lucide="sun" class="hidden dark:block"></i>
-                    <i data-lucide="moon" class="block dark:hidden"></i>
-                </button>
-                <button id="uploadButton" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-                    <i data-lucide="upload" class="inline-block mr-2"></i>
-                    Enviar Foto
-                </button>
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar closed fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform md:relative md:translate-x-0">
+            <div class="p-4">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">PhotoFeed</h2>
+                <nav>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" class="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="showPage('feed')">
+                                <i data-lucide="image" class="inline-block mr-2"></i> Fotos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="showPage('videos')">
+                                <i data-lucide="video" class="inline-block mr-2"></i> Vídeos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="showPage('profile')">
+                                <i data-lucide="user" class="inline-block mr-2"></i> Perfil
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
-        </header>
+        </aside>
 
-        <form id="uploadForm" class="mb-8 hidden">
-            <div class="space-y-4">
-                <input type="text" id="userName" placeholder="Seu nome (opcional)" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700">
-                <textarea id="description" placeholder="Descrição da foto (opcional)" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700"></textarea>
-                <input type="file" id="photoUpload" accept="image/*" required class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700">
-                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                    <i data-lucide="send" class="inline-block mr-2"></i>
-                    Enviar
+        <!-- Main Content -->
+        <div class="flex-1 p-4">
+            <header class="flex justify-between items-center mb-8">
+                <button id="sidebarToggle" class="md:hidden p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
-            </div>
-        </form>
+                <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">PhotoFeed</h1>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                        <i data-lucide="sun" class="hidden dark:block"></i>
+                        <i data-lucide="moon" class="block dark:hidden"></i>
+                    </button>
+                    <button id="uploadButton" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                        <i data-lucide="upload" class="inline-block mr-2"></i>
+                        Enviar Foto
+                    </button>
+                </div>
+            </header>
 
-        <div id="feed" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+            <!-- Feed Page -->
+            <div id="feedPage" class="page">
+                <form id="uploadForm" class="mb-8 hidden">
+                    <div class="space-y-4">
+                        <input type="text" id="userName" placeholder="Seu nome (opcional)" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700">
+                        <textarea id="description" placeholder="Descrição da foto (opcional)" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700"></textarea>
+                        <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer">
+                            <p>Arraste e solte uma imagem aqui ou clique para selecionar</p>
+                            <input type="file" id="photoUpload" accept="image/*" required class="hidden">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                            <i data-lucide="send" class="inline-block mr-2"></i>
+                            Enviar
+                        </button>
+                    </div>
+                </form>
+
+                <div id="feed" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+                <div id="infiniteScrollLoader" class="infinite-scroll-loader hidden">
+                    <i data-lucide="loader" class="animate-spin"></i>
+                </div>
+            </div>
+
+            <!-- Videos Page -->
+            <div id="videosPage" class="page hidden">
+                <h2 class="text-2xl font-bold mb-4">Vídeos</h2>
+                <p>Conteúdo da página de vídeos em desenvolvimento.</p>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profilePage" class="page hidden">
+                <h2 class="text-2xl font-bold mb-4">Perfil</h2>
+                <p>Conteúdo da página de perfil em desenvolvimento.</p>
+            </div>
+        </div>
     </div>
 
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
@@ -89,15 +162,64 @@
 
         // Toggle do tema claro/escuro
         const themeToggle = document.getElementById('themeToggle');
-        themeToggle.addEventListener('click', () => {
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Carregar tema salvo
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+        }
+
+        function toggleTheme() {
             document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        // Toggle do sidebar
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebar.classList.toggle('closed');
         });
+
+        // Navegação entre páginas
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+            document.getElementById(`${pageId}Page`).classList.remove('hidden');
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('open');
+                sidebar.classList.add('closed');
+            }
+        }
 
         // Toggle do formulário de upload
         const uploadButton = document.getElementById('uploadButton');
         const uploadForm = document.getElementById('uploadForm');
         uploadButton.addEventListener('click', () => {
             uploadForm.classList.toggle('hidden');
+        });
+
+        // Drag and drop para upload de fotos
+        const dropZone = document.getElementById('dropZone');
+        const photoUpload = document.getElementById('photoUpload');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-blue-500');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-blue-500');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-500');
+            photoUpload.files = e.dataTransfer.files;
+        });
+
+        dropZone.addEventListener('click', () => {
+            photoUpload.click();
         });
 
         // Função para enviar foto
@@ -126,10 +248,52 @@
             uploadForm.classList.add('hidden');
         });
 
+        // Variáveis para controle do infinite scroll
+        let lastKey = '';
+        const photosPerPage = 6;
+        let isLoading = false;
+
+        // Função para carregar mais fotos
+        function loadMorePhotos() {
+            if (isLoading) return;
+            isLoading = true;
+            document.getElementById('infiniteScrollLoader').classList.remove('hidden');
+
+            let query = photosRef.orderByKey().limitToLast(photosPerPage);
+            if (lastKey) {
+                query = query.endBefore(lastKey);
+            }
+
+            query.once('value', function(snapshot) {
+                const photos = [];
+                snapshot.forEach(function(childSnapshot) {
+                    photos.unshift({key: childSnapshot.key, val: childSnapshot.val()});
+                });
+
+                if (photos.length > 0) {
+                    lastKey = photos[0].key;
+                    photos.forEach(function(photo) {
+                        displayPhoto(photo.val, photo.key);
+                    });
+                }
+
+                isLoading = false;
+                document.getElementById('infiniteScrollLoader').classList.add('hidden');
+            });
+        }
+
+        // Iniciar o carregamento de fotos
+        loadMorePhotos();
+
+        // Implementar infinite scroll
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+                loadMorePhotos();
+            }
+        });
+
         // Função para exibir fotos
-        photosRef.on('child_added', function(snapshot) {
-            const photo = snapshot.val();
-            const photoId = snapshot.key;
+        function displayPhoto(photo, photoId) {
             const photoCard = document.createElement('div');
             photoCard.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden';
             photoCard.innerHTML = `
@@ -149,6 +313,9 @@
                     </div>
                 </div>
                 <div id="comments-${photoId}" class="hidden p-4 bg-gray-100 dark:bg-gray-700">
+                    <div class="comments-list mbHere's the continuation of the text stream from the cut-off point:
+
+gray-100 dark:bg-gray-700">
                     <div class="comments-list mb-2"></div>
                     <div class="flex">
                         <input type="text" class="comment-input flex-grow p-2 border rounded-l dark:bg-gray-800 dark:border-gray-600" placeholder="Adicione um comentário...">
@@ -158,7 +325,7 @@
                     </div>
                 </div>
             `;
-            document.getElementById('feed').prepend(photoCard);
+            document.getElementById('feed').appendChild(photoCard);
 
             // Adicionar evento de clique para abrir o modal
             photoCard.querySelector('img').addEventListener('click', function() {
@@ -170,7 +337,7 @@
 
             // Reinicializar ícones Lucide para os novos elementos
             lucide.createIcons();
-        });
+        }
 
         // Função para curtir foto
         function likePhoto(photoId) {
@@ -240,6 +407,15 @@
                                     Comentários
                                 </button>
                             </div>
+                            <div id="modal-comments-${photoId}" class="hidden mt-4">
+                                <div class="comments-list mb-2"></div>
+                                <div class="flex">
+                                    <input type="text" class="comment-input flex-grow p-2 border rounded-l dark:bg-gray-800 dark:border-gray-600" placeholder="Adicione um comentário...">
+                                    <button onclick="addModalComment('${photoId}')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r">
+                                        <i data-lucide="send" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -257,6 +433,9 @@
                 }
             });
 
+            // Carregar comentários no modal
+            loadModalComments(photoId);
+
             // Reinicializar ícones Lucide para os novos elementos
             lucide.createIcons();
         }
@@ -268,7 +447,34 @@
 
         // Função para alternar a visibilidade dos comentários no modal
         function toggleModalComments(photoId) {
-            // Implementar lógica para mostrar/ocultar comentários no modal
+            const commentsSection = document.getElementById(`modal-comments-${photoId}`);
+            commentsSection.classList.toggle('hidden');
+        }
+
+        // Função para adicionar comentário no modal
+        function addModalComment(photoId) {
+            const commentInput = document.querySelector(`#modal-comments-${photoId} .comment-input`);
+            const comment = commentInput.value.trim();
+            if (comment) {
+                database.ref('comments/' + photoId).push({
+                    text: comment,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+                commentInput.value = '';
+            }
+        }
+
+        // Função para carregar comentários no modal
+        function loadModalComments(photoId) {
+            const commentsRef = database.ref('comments/' + photoId);
+            const commentsList = document.querySelector(`#modal-comments-${photoId} .comments-list`);
+            commentsRef.on('child_added', function(snapshot) {
+                const comment = snapshot.val();
+                const commentElement = document.createElement('p');
+                commentElement.textContent = comment.text;
+                commentElement.className = 'mb-1 text-sm';
+                commentsList.appendChild(commentElement);
+            });
         }
     </script>
 </body>
