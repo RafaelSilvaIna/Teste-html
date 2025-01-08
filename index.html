@@ -3,85 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhotoFeed v2.0.0</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/glider-js@1/glider.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+    <title>PhotoFeed</title>
     <style>
-        .modal {
-            transition: opacity 0.3s ease-in-out;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
         }
-        .side-menu {
-            transition: transform 0.3s ease-in-out;
+        #app {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #uploadForm {
+            margin-bottom: 20px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #feed {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
         }
         .photo-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            width: calc(33.333% - 20px);
+            box-sizing: border-box;
         }
-        .photo-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        .photo-card img {
+            width: 100%;
+            height: auto;
+        }
+        .like-button {
+            background-color: #f44336;
+            margin-top: 10px;
+        }
+        .comment-section {
+            margin-top: 10px;
+        }
+        .comment-input {
+            width: calc(100% - 70px);
+        }
+        .comment-button {
+            width: 60px;
+        }
+        #carousel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        #carouselContent {
+            max-width: 80%;
+            max-height: 80%;
+        }
+        #carouselContent img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .close-button {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <header class="bg-white shadow-md fixed top-0 left-0 right-0 z-10">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-blue-600">PhotoFeed</h1>
-            <button id="menu-toggle" class="text-gray-600 hover:text-gray-800">
-                <i data-lucide="menu"></i>
-            </button>
-        </div>
-    </header>
-
-    <nav id="side-menu" class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform -translate-x-full z-20 side-menu">
-        <div class="p-4">
-            <h2 class="text-xl font-semibold mb-4">Menu</h2>
-            <ul>
-                <li><a href="#" class="block py-2 hover:text-blue-600">📄 Termos de Uso</a></li>
-                <li><a href="#" class="block py-2 hover:text-blue-600">🔒 Política de Privacidade</a></li>
-                <li><a href="#" class="block py-2 hover:text-blue-600">✉️ Contato</a></li>
-            </ul>
-        </div>
-    </nav>
-
-    <main class="container mx-auto px-4 pt-20 pb-10">
-        <form id="uploadForm" class="mb-8 bg-white shadow-md rounded-lg p-6">
-            <input type="text" id="userName" placeholder="Seu nome (opcional)" class="w-full mb-4 p-2 border rounded">
-            <textarea id="description" placeholder="Descrição da foto (opcional)" class="w-full mb-4 p-2 border rounded"></textarea>
-            <input type="file" id="photoUpload" accept="image/*" required class="mb-4">
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">Enviar Foto</button>
+<body>
+    <div id="app">
+        <h1>PhotoFeed</h1>
+        <form id="uploadForm">
+            <input type="text" id="userName" placeholder="Seu nome (opcional)">
+            <textarea id="description" placeholder="Descrição da foto (opcional)"></textarea>
+            <input type="file" id="photoUpload" accept="image/*" required>
+            <button type="submit">Enviar Foto</button>
         </form>
+        <div id="feed"></div>
+    </div>
 
-        <div id="categories" class="mb-6 sticky top-16 bg-white p-4 rounded-lg shadow-md z-10">
-            <h2 class="text-lg font-semibold mb-2">Categorias</h2>
-            <div class="flex space-x-2">
-                <button class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition duration-300">Todas</button>
-                <button class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition duration-300">Natureza</button>
-                <button class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition duration-300">Cidade</button>
-                <button class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition duration-300">Pessoas</button>
-            </div>
-        </div>
-
-        <div id="feed" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
-    </main>
-
-    <div id="photo-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden modal">
-        <div class="relative w-full max-w-4xl">
-            <button id="close-modal" class="absolute top-4 right-4 text-white text-2xl">&times;</button>
-            <div id="photo-carousel" class="glider">
-                <!-- Fotos serão inseridas aqui dinamicamente -->
-            </div>
-            <button class="glider-prev absolute left-4 top-1/2 transform -translate-y-1/2 text-white">&lt;</button>
-            <button class="glider-next absolute right-4 top-1/2 transform -translate-y-1/2 text-white">&gt;</button>
-        </div>
+    <div id="carousel">
+        <span class="close-button">&times;</span>
+        <div id="carouselContent"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/glider-js@1/glider.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
     <script>
         // Configuração do Firebase
         const firebaseConfig = {
@@ -103,9 +142,6 @@
         // Referência para o nó 'photos' no banco de dados
         const photosRef = database.ref('photos');
 
-        // Inicializar ícones Lucide
-        lucide.createIcons();
-
         // Função para enviar foto
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -114,7 +150,6 @@
             const file = document.getElementById('photoUpload').files[0];
 
             if (file) {
-                NProgress.start();
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const image = event.target.result;
@@ -124,14 +159,6 @@
                         image: image,
                         timestamp: firebase.database.ServerValue.TIMESTAMP,
                         likes: 0
-                    }).then(() => {
-                        NProgress.done();
-                        anime({
-                            targets: '#uploadForm',
-                            backgroundColor: ['#4CAF50', '#ffffff'],
-                            duration: 1000,
-                            easing: 'easeOutQuad'
-                        });
                     });
                 };
                 reader.readAsDataURL(file);
@@ -145,65 +172,25 @@
             const photo = snapshot.val();
             const photoId = snapshot.key;
             const photoCard = document.createElement('div');
-            photoCard.className = 'photo-card bg-white rounded-lg shadow-md overflow-hidden';
+            photoCard.className = 'photo-card';
             photoCard.innerHTML = `
-                <img src="${photo.image}" alt="Foto enviada por ${photo.userName}" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <p class="font-bold">${photo.userName}</p>
-                    <p class="text-sm text-gray-600">${photo.description}</p>
-                    <div class="mt-2 flex items-center justify-between">
-                        <button class="like-button flex items-center text-gray-600 hover:text-red-500 transition duration-300" onclick="likePhoto('${photoId}')">
-                            <i data-lucide="heart" class="mr-1"></i>
-                            <span id="likes-${photoId}">${photo.likes}</span>
-                        </button>
-                        <button class="comment-button flex items-center text-gray-600 hover:text-blue-500 transition duration-300" onclick="toggleComments('${photoId}')">
-                            <i data-lucide="message-circle" class="mr-1"></i>
-                            Comentários
-                        </button>
-                    </div>
-                </div>
-                <div id="comments-${photoId}" class="hidden p-4 bg-gray-100">
-                    <input type="text" id="comment-input-${photoId}" placeholder="Adicione um comentário..." class="w-full p-2 border rounded">
-                    <button onclick="addComment('${photoId}')" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">Enviar</button>
-                    <div id="comments-list-${photoId}" class="mt-4"></div>
+                <img src="${photo.image}" alt="Foto enviada por ${photo.userName}">
+                <p><strong>${photo.userName}</strong></p>
+                <p>${photo.description}</p>
+                <p>Curtidas: <span id="likes-${photoId}">${photo.likes}</span></p>
+                <button class="like-button" onclick="likePhoto('${photoId}')">Curtir</button>
+                <div class="comment-section">
+                    <input type="text" id="comment-${photoId}" class="comment-input" placeholder="Adicione um comentário...">
+                    <button onclick="addComment('${photoId}')" class="comment-button">Enviar</button>
+                    <div id="comments-${photoId}"></div>
                 </div>
             `;
             document.getElementById('feed').prepend(photoCard);
 
-            // Adicionar foto ao carrossel
-            const carouselSlide = document.createElement('div');
-            carouselSlide.className = 'glider-slide';
-            carouselSlide.innerHTML = `
-                <img src="${photo.image}" alt="Foto enviada por ${photo.userName}" class="w-full h-auto">
-                <div class="p-4 bg-white bg-opacity-75">
-                    <p class="font-bold">${photo.userName}</p>
-                    <p>${photo.description}</p>
-                </div>
-            `;
-            document.getElementById('photo-carousel').appendChild(carouselSlide);
-
-            // Atualizar o Glider
-            if (window.photoGlider) {
-                window.photoGlider.refresh(true);
-            } else {
-                window.photoGlider = new Glider(document.getElementById('photo-carousel'), {
-                    slidesToShow: 1,
-                    dots: '#dots',
-                    draggable: true,
-                    arrows: {
-                        prev: '.glider-prev',
-                        next: '.glider-next'
-                    }
-                });
-            }
-
             // Adicionar evento de clique para abrir o carrossel
             photoCard.querySelector('img').addEventListener('click', function() {
-                openCarousel(photoId);
+                openCarousel(photo);
             });
-
-            // Inicializar ícones Lucide para o novo card
-            lucide.createIcons();
 
             // Carregar comentários existentes
             loadComments(photoId);
@@ -214,13 +201,6 @@
             const likesRef = database.ref('photos/' + photoId + '/likes');
             likesRef.transaction(function(currentLikes) {
                 return (currentLikes || 0) + 1;
-            }).then(() => {
-                anime({
-                    targets: `#likes-${photoId}`,
-                    scale: [1, 1.5, 1],
-                    duration: 300,
-                    easing: 'easeInOutQuad'
-                });
             });
         }
 
@@ -233,21 +213,14 @@
 
         // Função para adicionar comentário
         function addComment(photoId) {
-            const commentInput = document.getElementById(`comment-input-${photoId}`);
+            const commentInput = document.getElementById(`comment-${photoId}`);
             const comment = commentInput.value.trim();
             if (comment) {
                 database.ref('comments/' + photoId).push({
                     text: comment,
                     timestamp: firebase.database.ServerValue.TIMESTAMP
-                }).then(() => {
-                    commentInput.value = '';
-                    anime({
-                        targets: commentInput,
-                        backgroundColor: ['#4CAF50', '#ffffff'],
-                        duration: 1000,
-                        easing: 'easeOutQuad'
-                    });
                 });
+                commentInput.value = '';
             }
         }
 
@@ -258,51 +231,25 @@
                 const comment = snapshot.val();
                 const commentElement = document.createElement('p');
                 commentElement.textContent = comment.text;
-                commentElement.className = 'mb-2 text-sm';
-                document.getElementById(`comments-list-${photoId}`).appendChild(commentElement);
+                document.getElementById(`comments-${photoId}`).appendChild(commentElement);
             });
         }
 
-        // Função para alternar a visibilidade dos comentários
-        function toggleComments(photoId) {
-            const commentsSection = document.getElementById(`comments-${photoId}`);
-            commentsSection.classList.toggle('hidden');
-        }
-
         // Função para abrir o carrossel
-        function openCarousel(photoId) {
-            const modal = document.getElementById('photo-modal');
-            modal.classList.remove('hidden');
-            window.photoGlider.scrollItem(Array.from(window.photoGlider.slides).findIndex(slide => slide.dataset.photoId === photoId));
+        function openCarousel(photo) {
+            const carousel = document.getElementById('carousel');
+            const carouselContent = document.getElementById('carouselContent');
+            carouselContent.innerHTML = `
+                <img src="${photo.image}" alt="Foto enviada por ${photo.userName}">
+                <p><strong>${photo.userName}</strong></p>
+                <p>${photo.description}</p>
+            `;
+            carousel.style.display = 'flex';
         }
 
-        // Lógica para fechar o modal de visualização de fotos
-        const modal = document.getElementById('photo-modal');
-        const closeButton = document.getElementById('close-modal');
-
-        closeButton.addEventListener('click', () => {
-            modal.classList.add('hidden');
-        });
-
-        window.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                modal.classList.add('hidden');
-            }
-        });
-
-        // Lógica para o menu lateral
-        const menuToggle = document.getElementById('menu-toggle');
-        const sideMenu = document.getElementById('side-menu');
-
-        menuToggle.addEventListener('click', () => {
-            sideMenu.classList.toggle('-translate-x-full');
-        });
-
-        // Fechar o menu ao clicar fora dele
-        document.addEventListener('click', (event) => {
-            if (!sideMenu.contains(event.target) && !menuToggle.contains(event.target)) {
-                sideMenu.classList.add('-translate-x-full');
-            }
+        // Fechar o carrossel
+        document.querySelector('.close-button').addEventListener('click', function() {
+            document.getElementById('carousel').style.display = 'none';
         });
     </script>
 </body>
