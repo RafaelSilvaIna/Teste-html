@@ -3,158 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhotoFeed v1.20.0</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glider-js@1.7.7/glider.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <title>PhotoFeed v1.30.0</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glider-js/glider.min.css" />
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #121212;
-            color: #FFFFFF;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-        }
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .menu-button {
-            background: none;
-            border: none;
-            color: #FFFFFF;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        .category-filter {
-            margin-bottom: 20px;
-        }
-        .feed {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .photo-card {
-            background-color: #1E1E1E;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-        .photo-card:hover {
-            transform: translateY(-5px);
-        }
-        .photo-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .photo-info {
-            padding: 15px;
-        }
-        .photo-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-        }
-        .reaction-button, .comment-button, .report-button {
-            background: none;
-            border: none;
-            color: #FFFFFF;
-            cursor: pointer;
-            font-size: 18px;
-        }
-        .like-button {
-            background-color: #00C853;
-            color: #FFFFFF;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .like-button:hover {
-            background-color: #00E676;
-        }
-        footer {
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 40px;
-            border-top: 1px solid #333;
-        }
-        footer a {
-            color: #FFFFFF;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        .upload-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #00C853;
-            color: #FFFFFF;
-            border: none;
-            padding: 15px;
-            border-radius: 50%;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        @keyframes likeAnimation {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        .like-animation {
-            animation: likeAnimation 0.5s ease;
+        .dark {
+            background-color: #1a202c;
+            color: #e2e8f0;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <div class="logo">PhotoFeed</div>
-            <button class="menu-button" onclick="openMenu()">☰</button>
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
+    <div id="app" class="max-w-4xl mx-auto p-4">
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">PhotoFeed</h1>
+            <div class="flex items-center space-x-4">
+                <button id="themeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                    <i data-lucide="sun" class="hidden dark:block"></i>
+                    <i data-lucide="moon" class="block dark:hidden"></i>
+                </button>
+                <button id="uploadButton" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                    <i data-lucide="upload" class="inline-block mr-2"></i>
+                    Enviar Foto
+                </button>
+            </div>
         </header>
 
-        <div class="category-filter">
-            <div class="glider">
-                <button onclick="filterCategory('all')">Todas</button>
-                <button onclick="filterCategory('nature')">📸 Natureza</button>
-                <button onclick="filterCategory('tech')">💻 Tecnologia</button>
-                <button onclick="filterCategory('art')">🎨 Arte</button>
-                <button onclick="filterCategory('other')">📚 Outros</button>
+        <form id="uploadForm" class="mb-8 hidden">
+            <div class="space-y-4">
+                <input type="text" id="userName" placeholder="Seu nome (opcional)" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700">
+                <textarea id="description" placeholder="Descrição da foto (opcional)" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700"></textarea>
+                <input type="file" id="photoUpload" accept="image/*" required class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700">
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    <i data-lucide="send" class="inline-block mr-2"></i>
+                    Enviar
+                </button>
             </div>
+        </form>
+
+        <div id="feed" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+    </div>
+
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="relative w-full h-full max-w-4xl">
+            <button id="closeModal" class="absolute top-4 right-4 text-white">
+                <i data-lucide="x" class="w-8 h-8"></i>
+            </button>
+            <div id="carousel" class="glider h-full"></div>
+            <button id="prevSlide" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white">
+                <i data-lucide="chevron-left" class="w-8 h-8"></i>
+            </button>
+            <button id="nextSlide" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white">
+                <i data-lucide="chevron-right" class="w-8 h-8"></i>
+            </button>
         </div>
-
-        <div class="feed" id="photo-feed"></div>
-
-        <button class="upload-button" onclick="openUploadModal()">+</button>
-
-        <footer>
-            <a href="#" onclick="openContactModal()">Contato</a>
-            <a href="#" onclick="openTermsModal()">Termos de Uso</a>
-            <a href="#" onclick="openPrivacyModal()">Política de Privacidade</a>
-        </footer>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/glider-js@1.7.7/glider.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/glider-js/glider.min.js"></script>
     <script>
         // Configuração do Firebase
         const firebaseConfig = {
@@ -176,255 +84,192 @@
         // Referência para o nó 'photos' no banco de dados
         const photosRef = database.ref('photos');
 
-        // Inicializar Glider.js para o filtro de categorias
-        new Glider(document.querySelector('.glider'), {
-            slidesToShow: 'auto',
-            slidesToScroll: 'auto',
-            draggable: true,
-            arrows: {
-                prev: '.glider-prev',
-                next: '.glider-next'
-            }
+        // Inicializar ícones Lucide
+        lucide.createIcons();
+
+        // Toggle do tema claro/escuro
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
         });
 
-        // Função para abrir o modal de upload
-        function openUploadModal() {
-            Swal.fire({
-                title: 'Enviar Foto',
-                html: `
-                    <input id="userName" class="swal2-input" placeholder="Seu nome (opcional)">
-                    <input id="photoCategory" class="swal2-input" placeholder="Categoria">
-                    <textarea id="description" class="swal2-textarea" placeholder="Descrição da foto (opcional)"></textarea>
-                    <input type="file" id="photoUpload" accept="image/*" required>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Enviar',
-                cancelButtonText: 'Cancelar',
-                preConfirm: () => {
-                    const userName = document.getElementById('userName').value || 'Anônimo';
-                    const category = document.getElementById('photoCategory').value;
-                    const description = document.getElementById('description').value;
-                    const file = document.getElementById('photoUpload').files[0];
+        // Toggle do formulário de upload
+        const uploadButton = document.getElementById('uploadButton');
+        const uploadForm = document.getElementById('uploadForm');
+        uploadButton.addEventListener('click', () => {
+            uploadForm.classList.toggle('hidden');
+        });
 
-                    if (!file) {
-                        Swal.showValidationMessage('Por favor, selecione uma foto');
-                        return false;
-                    }
+        // Função para enviar foto
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userName = document.getElementById('userName').value || 'Anônimo';
+            const description = document.getElementById('description').value;
+            const file = document.getElementById('photoUpload').files[0];
 
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            resolve({ userName, category, description, image: e.target.result });
-                        };
-                        reader.readAsDataURL(file);
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const image = event.target.result;
+                    photosRef.push({
+                        userName: userName,
+                        description: description,
+                        image: image,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP,
+                        likes: 0
                     });
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    uploadPhoto(result.value);
-                }
-            });
-        }
+                };
+                reader.readAsDataURL(file);
+            }
 
-        // Função para fazer upload da foto
-        function uploadPhoto(photoData) {
-            photosRef.push({
-                userName: photoData.userName,
-                category: photoData.category,
-                description: photoData.description,
-                image: photoData.image,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                likes: 0,
-                reactions: {
-                    like: 0,
-                    love: 0,
-                    haha: 0,
-                    wow: 0
-                }
-            });
-        }
+            this.reset();
+            uploadForm.classList.add('hidden');
+        });
 
         // Função para exibir fotos
-        function displayPhotos(photos) {
-            const feed = document.getElementById('photo-feed');
-            feed.innerHTML = '';
-            Object.entries(photos).forEach(([key, photo]) => {
-                const photoCard = document.createElement('div');
-                photoCard.className = 'photo-card';
-                photoCard.innerHTML = `
-                    <img src="${photo.image}" alt="Foto enviada por ${photo.userName}">
-                    <div class="photo-info">
-                        <h3>${photo.userName}</h3>
-                        <p>${photo.description}</p>
-                    </div>
-                    <div class="photo-actions">
-                        <button class="like-button" onclick="likePhoto('${key}')">
-                            👍 <span id="likes-${key}">${photo.likes}</span>
+        photosRef.on('child_added', function(snapshot) {
+            const photo = snapshot.val();
+            const photoId = snapshot.key;
+            const photoCard = document.createElement('div');
+            photoCard.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden';
+            photoCard.innerHTML = `
+                <img src="${photo.image}" alt="Foto enviada por ${photo.userName}" class="w-full h-48 object-cover cursor-pointer">
+                <div class="p-4">
+                    <p class="font-bold">${photo.userName}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">${photo.description}</p>
+                    <div class="mt-2 flex items-center justify-between">
+                        <button class="like-button flex items-center text-gray-600 dark:text-gray-400" onclick="likePhoto('${photoId}')">
+                            <i data-lucide="heart" class="w-5 h-5 mr-1"></i>
+                            <span id="likes-${photoId}">${photo.likes}</span>
                         </button>
-                        <button class="reaction-button" onclick="showReactions('${key}')">😀</button>
-                        <button class="comment-button" onclick="showComments('${key}')">💬</button>
-                        <button class="report-button" onclick="reportPhoto('${key}')">🚩</button>
+                        <button class="comment-button flex items-center text-gray-600 dark:text-gray-400" onclick="toggleComments('${photoId}')">
+                            <i data-lucide="message-circle" class="w-5 h-5 mr-1"></i>
+                            Comentários
+                        </button>
                     </div>
-                `;
-                feed.appendChild(photoCard);
+                </div>
+                <div id="comments-${photoId}" class="hidden p-4 bg-gray-100 dark:bg-gray-700">
+                    <div class="comments-list mb-2"></div>
+                    <div class="flex">
+                        <input type="text" class="comment-input flex-grow p-2 border rounded-l dark:bg-gray-800 dark:border-gray-600" placeholder="Adicione um comentário...">
+                        <button onclick="addComment('${photoId}')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-r">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('feed').prepend(photoCard);
+
+            // Adicionar evento de clique para abrir o modal
+            photoCard.querySelector('img').addEventListener('click', function() {
+                openModal(photo, photoId);
             });
-        }
+
+            // Carregar comentários existentes
+            loadComments(photoId);
+
+            // Reinicializar ícones Lucide para os novos elementos
+            lucide.createIcons();
+        });
 
         // Função para curtir foto
         function likePhoto(photoId) {
-            const likesRef = database.ref(`photos/${photoId}/likes`);
+            const likesRef = database.ref('photos/' + photoId + '/likes');
             likesRef.transaction(function(currentLikes) {
                 return (currentLikes || 0) + 1;
             });
-            document.querySelector(`#likes-${photoId}`).classList.add('like-animation');
-            setTimeout(() => {
-                document.querySelector(`#likes-${photoId}`).classList.remove('like-animation');
-            }, 500);
         }
 
-        // Função para mostrar reações
-        function showReactions(photoId) {
-            Swal.fire({
-                title: 'Reações',
-                html: `
-                    <button onclick="addReaction('${photoId}', 'like')">👍</button>
-                    <button onclick="addReaction('${photoId}', 'love')">❤️</button>
-                    <button onclick="addReaction('${photoId}', 'haha')">😂</button>
-                    <button onclick="addReaction('${photoId}', 'wow')">😮</button>
-                `,
-                showConfirmButton: false
-            });
-        }
+        // Atualizar contagem de curtidas em tempo real
+        photosRef.on('child_changed', function(snapshot) {
+            const photo = snapshot.val();
+            const photoId = snapshot.key;
+            document.getElementById(`likes-${photoId}`).textContent = photo.likes;
+        });
 
-        // Função para adicionar reação
-        function addReaction(photoId, reactionType) {
-            const reactionRef = database.ref(`photos/${photoId}/reactions/${reactionType}`);
-            reactionRef.transaction(function(currentReactions) {
-                return (currentReactions || 0) + 1;
-            });
-            Swal.close();
-        }
-
-        // Função para mostrar comentários
-        function showComments(photoId) {
-            const commentsRef = database.ref(`comments/${photoId}`);
-            commentsRef.once('value', (snapshot) => {
-                const comments = snapshot.val() || {};
-                let commentsList = '';
-                Object.values(comments).forEach((comment) => {
-                    commentsList += `<p>${comment.text}</p>`;
+        // Função para adicionar comentário
+        function addComment(photoId) {
+            const commentInput = document.querySelector(`#comments-${photoId} .comment-input`);
+            const comment = commentInput.value.trim();
+            if (comment) {
+                database.ref('comments/' + photoId).push({
+                    text: comment,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
-
-                Swal.fire({
-                    title: 'Comentários',
-                    html: `
-                        <div>${commentsList}</div>
-                        <textarea id="newComment" class="swal2-textarea" placeholder="Adicione um comentário..."></textarea>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: 'Enviar',
-                    cancelButtonText: 'Fechar',
-                    preConfirm: () => {
-                        const newComment = document.getElementById('newComment').value;
-                        if (newComment) {
-                            commentsRef.push({
-                                text: newComment,
-                                timestamp: firebase.database.ServerValue.TIMESTAMP
-                            });
-                        }
-                    }
-                });
-            });
-        }
-
-        // Função para denunciar foto
-        function reportPhoto(photoId) {
-            Swal.fire({
-                title: 'Denunciar Foto',
-                input: 'select',
-                inputOptions: {
-                    'offensive': 'Conteúdo ofensivo',
-                    'copyright': 'Violação de direitos autorais',
-                    'spam': 'Spam'
-                },
-                inputPlaceholder: 'Selecione o motivo',
-                showCancelButton: true,
-                confirmButtonText: 'Denunciar',
-                cancelButtonText: 'Cancelar',
-                preConfirm: (reason) => {
-                    if (reason) {
-                        database.ref(`reports/${photoId}`).push({
-                            reason: reason,
-                            timestamp: firebase.database.ServerValue.TIMESTAMP
-                        });
-                        return true;
-                    }
-                    return false;
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire('Denúncia enviada', 'Obrigado por nos ajudar a manter a comunidade segura.', 'success');
-                }
-            });
-        }
-
-        // Função para filtrar por categoria
-        function filterCategory(category) {
-            if (category === 'all') {
-                photosRef.once('value', (snapshot) => {
-                    displayPhotos(snapshot.val() || {});
-                });
-            } else {
-                photosRef.orderByChild('category').equalTo(category).once('value', (snapshot) => {
-                    displayPhotos(snapshot.val() || {});
-                });
+                commentInput.value = '';
             }
         }
 
-        // Função para abrir o menu lateral
-        function openMenu() {
-            Swal.fire({
-                title: 'Menu',
-                html: `
-                    <button onclick="openUploadModal()">Enviar Foto</button>
-                    <button onclick="openContactModal()">Contato</button>
-                    <button onclick="openTermsModal()">Termos de Uso</button>
-                    <button onclick="openPrivacyModal()">Política de Privacidade</button>
-                `,
-                showConfirmButton: false
+        // Função para carregar comentários
+        function loadComments(photoId) {
+            const commentsRef = database.ref('comments/' + photoId);
+            const commentsList = document.querySelector(`#comments-${photoId} .comments-list`);
+            commentsRef.on('child_added', function(snapshot) {
+                const comment = snapshot.val();
+                const commentElement = document.createElement('p');
+                commentElement.textContent = comment.text;
+                commentElement.className = 'mb-1 text-sm';
+                commentsList.appendChild(commentElement);
             });
         }
 
-        // Funções para abrir modais de Contato, Termos e Privacidade
-        function openContactModal() {
-            Swal.fire('Contato', 'Entre em contato conosco pelo email: contato@photofeed.com', 'info');
+        // Função para alternar a visibilidade dos comentários
+        function toggleComments(photoId) {
+            const commentsSection = document.getElementById(`comments-${photoId}`);
+            commentsSection.classList.toggle('hidden');
         }
 
-        function openTermsModal() {
-            Swal.fire('Termos de Uso', 'Ao usar o PhotoFeed, você concorda em seguir nossas diretrizes de comunidade e respeitar os direitos autorais.', 'info');
+        // Função para abrir o modal
+        function openModal(photo, photoId) {
+            const modal = document.getElementById('modal');
+            const carousel = document.getElementById('carousel');
+            carousel.innerHTML = `
+                <div class="glider-track">
+                    <div class="glider-slide">
+                        <img src="${photo.image}" alt="Foto enviada por ${photo.userName}" class="w-full h-full object-contain">
+                        <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-4">
+                            <p class="font-bold">${photo.userName}</p>
+                            <p>${photo.description}</p>
+                            <div class="mt-2 flex items-center justify-between">
+                                <button class="like-button flex items-center" onclick="likePhoto('${photoId}')">
+                                    <i data-lucide="heart" class="w-5 h-5 mr-1"></i>
+                                    <span id="modal-likes-${photoId}">${photo.likes}</span>
+                                </button>
+                                <button class="comment-button flex items-center" onclick="toggleModalComments('${photoId}')">
+                                    <i data-lucide="message-circle" class="w-5 h-5 mr-1"></i>
+                                    Comentários
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+
+            // Inicializar Glider
+            new Glider(carousel, {
+                slidesToShow: 1,
+                dots: '#dots',
+                draggable: true,
+                arrows: {
+                    prev: '#prevSlide',
+                    next: '#nextSlide'
+                }
+            });
+
+            // Reinicializar ícones Lucide para os novos elementos
+            lucide.createIcons();
         }
 
-        function openPrivacyModal() {
-            Swal.fire('Política de Privacidade', 'Nós respeitamos sua privacidade. Suas informações pessoais não serão compartilhadas com terceiros.', 'info');
+        // Fechar o modal
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('modal').classList.add('hidden');
+        });
+
+        // Função para alternar a visibilidade dos comentários no modal
+        function toggleModalComments(photoId) {
+            // Implementar lógica para mostrar/ocultar comentários no modal
         }
-
-        // Carregar fotos iniciais
-        photosRef.once('value', (snapshot) => {
-            displayPhotos(snapshot.val() || {});
-        });
-
-        // Ouvir por mudanças em tempo real
-        photosRef.on('child_added', (snapshot) => {
-            const newPhoto = {};
-            newPhoto[snapshot.key] = snapshot.val();
-            displayPhotos(newPhoto);
-        });
-
-        photosRef.on('child_changed', (snapshot) => {
-            const updatedPhoto = {};
-            updatedPhoto[snapshot.key] = snapshot.val();
-            displayPhotos(updatedPhoto);
-        });
     </script>
 </body>
 </html>
