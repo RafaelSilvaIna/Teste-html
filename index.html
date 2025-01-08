@@ -13,12 +13,13 @@
     <script>
         document.getElementById('fetchData').addEventListener('click', async () => {
             try {
-                // Faz a requisição para a API local
-                const response = await fetch('http://localhost:3000/');
-                const data = await response.text();
+                // Substitua pelo IP da sua máquina
+                const response = await fetch('http://10.0.0.109:5000/');
+                const data = await response.json();
                 
-                // Exibe a resposta no parágrafo
-                document.getElementById('response').innerText = data;
+                // Exibindo a resposta da API
+                document.getElementById('response').innerText = 
+                    `Mensagem: ${data.message} \nIP: ${data.ip}`;
             } catch (error) {
                 document.getElementById('response').innerText = 'Erro ao conectar com a API.';
                 console.error('Erro:', error);
