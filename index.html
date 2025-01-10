@@ -70,20 +70,23 @@
         }
 
         async function makeRequest(endpoint, data) {
-            try {
-                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
-                const result = await response.json();
-                displayResult(result);
-            } catch (error) {
-                displayResult({ error: error.message });
-            }
-        }
+    try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        const result = await response.json();
+        console.log('API Response:', result);  // Log da resposta
+        displayResult(result);
+    } catch (error) {
+        console.error('API Error:', error);  // Log do erro
+        displayResult({ error: error.message });
+    }
+}
+
 
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
