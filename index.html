@@ -69,7 +69,7 @@
     <script>
         // Função para buscar o status atual
         function fetchStatus() {
-            fetch('http://127.0.0.1:5000/status')
+            fetch('https://apistatus.vercel.app/status')
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('servidor-status').textContent = data.servidor;
