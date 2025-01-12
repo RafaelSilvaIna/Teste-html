@@ -1,145 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autenticação com Firebase</title>
+    <title>Status API</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
             padding: 20px;
+            background-color: #f4f4f4;
         }
-        input {
-            padding: 10px;
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .status-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .status-item {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 30%;
+        }
+        .status-item p {
+            font-size: 18px;
             margin: 10px 0;
-            width: 100%;
         }
-        button {
-            padding: 10px;
-            background-color: #4CAF50;
+        .status-item button {
+            padding: 10px 15px;
+            background-color: #28a745;
             color: white;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
-            width: 100%;
         }
-        button:disabled {
-            background-color: #ccc;
-        }
-        .message {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #f1f1f1;
-            border: 1px solid #ccc;
+        .status-item button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
 
-    <h1>Autenticação com Firebase</h1>
+    <h1>Status do Sistema</h1>
 
-    <!-- Formulário de Registro -->
-    <h2>Registrar</h2>
-    <input type="email" id="register-email" placeholder="Digite seu email" />
-    <input type="password" id="register-password" placeholder="Digite sua senha" />
-    <button onclick="registerUser()">Registrar</button>
-
-    <h2>Login</h2>
-    <input type="email" id="login-email" placeholder="Digite seu email" />
-    <input type="password" id="login-password" placeholder="Digite sua senha" />
-    <button onclick="loginUser()">Login</button>
-
-    <h2>Verificar Token</h2>
-    <button onclick="verifyToken()">Verificar Login</button>
-
-    <h2>Logout</h2>
-    <button onclick="logoutUser()">Deslogar</button>
-
-    <div id="response" class="message"></div>
+    <div class="status-container">
+        <div class="status-item" id="servidor">
+            <h2>Servidor</h2>
+            <p id="servidor-status">Carregando...</p>
+            <button onclick="alterarStatus('servidor')">Alterar Status</button>
+        </div>
+        <div class="status-item" id="hospedagem">
+            <h2>Hospedagem</h2>
+            <p id="hospedagem-status">Carregando...</p>
+            <button onclick="alterarStatus('hospedagem')">Alterar Status</button>
+        </div>
+        <div class="status-item" id="api">
+            <h2>API</h2>
+            <p id="api-status">Carregando...</p>
+            <button onclick="alterarStatus('api')">Alterar Status</button>
+        </div>
+    </div>
 
     <script>
-        const apiUrl = 'ttps://crispy-capybara-g47jvx64x9rv2w97j-3000.app.github.dev';
+        // Função para buscar o status atual
+        function fetchStatus() {
+            fetch('http://127.0.0.1:5000/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('servidor-status').textContent = data.servidor;
+                    document.getElementById('hospedagem-status').textContent = data.hospedagem;
+                    document.getElementById('api-status').textContent = data.api;
+                })
+                .catch(error => console.error('Erro ao buscar status:', error));
+        }
 
-        // Função para registrar o usuário
-        async function registerUser() {
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
+        // Função para alterar o status
+        function alterarStatus(service) {
+            const statusAtual = document.getElementById(`${service}-status`).textContent;
+            const novoStatus = statusAtual === 'funcionando' ? 'indisponível' : 'funcionando';
+            const data = { status: novoStatus };
 
-            if (!email || !password) {
-                showResponse('Por favor, preencha todos os campos.');
-                return;
-            }
-
-            const response = await fetch(`${apiUrl}/signup`, {
+            fetch(`http://127.0.0.1:5000/status/${service}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password }),
-            });
-
-            const result = await response.json();
-            showResponse(result.message || result.error);
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById(`${service}-status`).textContent = data[service];
+            })
+            .catch(error => console.error('Erro ao alterar status:', error));
         }
 
-        // Função para fazer login
-        async function loginUser() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
-            if (!email || !password) {
-                showResponse('Por favor, preencha todos os campos.');
-                return;
-            }
-
-            const response = await fetch(`${apiUrl}/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-
-            const result = await response.json();
-            if (result.token) {
-                localStorage.setItem('token', result.token);
-                showResponse('Login bem-sucedido!');
-            } else {
-                showResponse(result.message || result.error);
-            }
-        }
-
-        // Função para verificar o token
-        async function verifyToken() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                showResponse('Você não está logado.');
-                return;
-            }
-
-            const response = await fetch(`${apiUrl}/verify-token`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            const result = await response.json();
-            showResponse(result.message || result.error);
-        }
-
-        // Função para deslogar o usuário
-        async function logoutUser() {
-            localStorage.removeItem('token');
-            showResponse('Deslogado com sucesso!');
-        }
-
-        // Função para mostrar as respostas
-        function showResponse(message) {
-            const responseElement = document.getElementById('response');
-            responseElement.textContent = message;
-        }
+        // Carregar status ao carregar a página
+        window.onload = fetchStatus;
     </script>
 
 </body>
