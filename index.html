@@ -3,89 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status API</title>
+    <title>Status do Sistema</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .status-container {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .status-item {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 30%;
-        }
-        .status-item p {
-            font-size: 18px;
-            margin: 10px 0;
-        }
-        .status-item button {
-            padding: 10px 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .status-item button:hover {
-            background-color: #218838;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f3f4f6;
         }
     </style>
 </head>
-<body>
-
-    <h1>Status do Sistema</h1>
-
-    <div class="status-container">
-        <div class="status-item" id="servidor">
-            <h2>Servidor</h2>
-            <p id="servidor-status">Carregando...</p>
-            <button onclick="alterarStatus('servidor')">Alterar Status</button>
-        </div>
-        <div class="status-item" id="hospedagem">
-            <h2>Hospedagem</h2>
-            <p id="hospedagem-status">Carregando...</p>
-            <button onclick="alterarStatus('hospedagem')">Alterar Status</button>
-        </div>
-        <div class="status-item" id="api">
-            <h2>API</h2>
-            <p id="api-status">Carregando...</p>
-            <button onclick="alterarStatus('api')">Alterar Status</button>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Status do Sistema</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-lg shadow-lg p-6" id="servidor">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Servidor</h2>
+                <div class="flex items-center justify-between">
+                    <p id="servidor-status" class="text-lg font-medium">Carregando...</p>
+                    <button onclick="alterarStatus('servidor')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        <i class="fas fa-sync-alt mr-2"></i>Alterar
+                    </button>
+                </div>
+                <canvas id="servidor-chart" class="mt-4"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6" id="hospedagem">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Hospedagem</h2>
+                <div class="flex items-center justify-between">
+                    <p id="hospedagem-status" class="text-lg font-medium">Carregando...</p>
+                    <button onclick="alterarStatus('hospedagem')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        <i class="fas fa-sync-alt mr-2"></i>Alterar
+                    </button>
+                </div>
+                <canvas id="hospedagem-chart" class="mt-4"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6" id="api">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">API</h2>
+                <div class="flex items-center justify-between">
+                    <p id="api-status" class="text-lg font-medium">Carregando...</p>
+                    <button onclick="alterarStatus('api')" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        <i class="fas fa-sync-alt mr-2"></i>Alterar
+                    </button>
+                </div>
+                <canvas id="api-chart" class="mt-4"></canvas>
+            </div>
         </div>
     </div>
 
     <script>
-        // Função para buscar o status atual
+        const charts = {};
+
+        function initializeCharts() {
+            ['servidor', 'hospedagem', 'api'].forEach(service => {
+                const ctx = document.getElementById(`${service}-chart`).getContext('2d');
+                charts[service] = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Funcionando', 'Indisponível'],
+                        datasets: [{
+                            data: [100, 0],
+                            backgroundColor: ['#10B981', '#EF4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        function updateChart(service, status) {
+            const data = status === 'funcionando' ? [100, 0] : [0, 100];
+            charts[service].data.datasets[0].data = data;
+            charts[service].update();
+        }
+
         function fetchStatus() {
             fetch('https://apistatus.vercel.app/status')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('servidor-status').textContent = data.servidor;
-                    document.getElementById('hospedagem-status').textContent = data.hospedagem;
-                    document.getElementById('api-status').textContent = data.api;
+                    Object.entries(data).forEach(([service, status]) => {
+                        const statusElement = document.getElementById(`${service}-status`);
+                        statusElement.textContent = status;
+                        statusElement.className = status === 'funcionando' ? 'text-green-500' : 'text-red-500';
+                        updateChart(service, status);
+                    });
                 })
                 .catch(error => console.error('Erro ao buscar status:', error));
         }
 
-        // Função para alterar o status
         function alterarStatus(service) {
             const statusAtual = document.getElementById(`${service}-status`).textContent;
             const novoStatus = statusAtual === 'funcionando' ? 'indisponível' : 'funcionando';
             const data = { status: novoStatus };
 
-            fetch(`http://127.0.0.1:5000/status/${service}`, {
+            fetch(`https://apistatus.vercel.app/status/${service}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -94,14 +116,33 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById(`${service}-status`).textContent = data[service];
+                const newStatus = data[service];
+                const statusElement = document.getElementById(`${service}-status`);
+                statusElement.textContent = newStatus;
+                statusElement.className = newStatus === 'funcionando' ? 'text-green-500' : 'text-red-500';
+                updateChart(service, newStatus);
+                Swal.fire({
+                    title: 'Status Atualizado',
+                    text: `O status do ${service} foi alterado para ${newStatus}`,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
             })
-            .catch(error => console.error('Erro ao alterar status:', error));
+            .catch(error => {
+                console.error('Erro ao alterar status:', error);
+                Swal.fire({
+                    title: 'Erro',
+                    text: 'Não foi possível alterar o status. Tente novamente.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
         }
 
-        // Carregar status ao carregar a página
-        window.onload = fetchStatus;
+        window.onload = () => {
+            initializeCharts();
+            fetchStatus();
+        };
     </script>
-
 </body>
 </html>
