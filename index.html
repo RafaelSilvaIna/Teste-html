@@ -24,7 +24,7 @@
             border-radius: 8px;
             padding: 16px;
             width: 200px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .product h2 {
             font-size: 18px;
@@ -46,7 +46,13 @@
 
     async function fetchProducts() {
         try {
-            const response = await fetch('https://api.kiwify.com/v1/products', {
+            // Verificando se o navegador suporta fetch
+            if (!window.fetch) {
+                throw new Error('Fetch API is not supported in this browser.');
+            }
+
+            // Endpoint atualizado
+            const response = await fetch('https://app.kiwify.com/api/v1/products', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -54,22 +60,26 @@
                 }
             });
 
+            // Tratamento de erros HTTP
             if (!response.ok) {
-                throw new Error('Failed to fetch products');
+                throw new Error(`Failed to fetch products. Status: ${response.status}`);
             }
 
+            // Convertendo resposta para JSON
             const data = await response.json();
             displayProducts(data.products);
         } catch (error) {
             document.getElementById('products').innerText = 'Error loading products.';
-            console.error(error);
+            console.error('Error:', error);
         }
     }
 
+    // Função para exibir os produtos na página
     function displayProducts(products) {
         const productsContainer = document.getElementById('products');
         productsContainer.innerHTML = '';
 
+        // Iterando pelos produtos e criando elementos HTML
         products.forEach(product => {
             const productElement = document.createElement('div');
             productElement.className = 'product';
@@ -84,6 +94,7 @@
         });
     }
 
+    // Chamando a função para buscar os produtos
     fetchProducts();
 </script>
 
