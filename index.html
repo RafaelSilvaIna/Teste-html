@@ -3,294 +3,2376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo 3D em HTML</title>
+    <title>A Metrópole Esquecida</title>
     <style>
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            font-family: Arial, sans-serif;
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            background-color: #000;
         }
-        canvas { 
-            display: block; 
+        
+        canvas {
+            display: block;
         }
-        #info {
+        
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            z-index: 1000;
+        }
+        
+        #loading-bar {
+            width: 60%;
+            height: 30px;
+            border: 2px solid #0f95e6;
+            border-radius: 15px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #loading-progress {
+            height: 100%;
+            background-color: #0f95e6;
+            width: 0%;
+            transition: width 0.3s;
+            box-shadow: 0 0 15px rgba(15, 149, 230, 0.7);
+        }
+        
+        #loading-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: loading-shine 1.5s infinite;
+        }
+        
+        @keyframes loading-shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        #intro {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            z-index: 999;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            overflow-y: auto;
+            background-image: radial-gradient(circle at center, rgba(15, 149, 230, 0.1) 0%, rgba(0, 0, 0, 0.9) 70%);
+        }
+        
+        #intro h1 {
+            color: #0f95e6;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(15, 149, 230, 0.5);
+            letter-spacing: 3px;
+            animation: title-glow 2s infinite alternate;
+        }
+        
+        @keyframes title-glow {
+            from { text-shadow: 0 0 10px rgba(15, 149, 230, 0.5); }
+            to { text-shadow: 0 0 20px rgba(15, 149, 230, 0.8), 0 0 30px rgba(15, 149, 230, 0.6); }
+        }
+        
+        #intro p {
+            font-size: 1.2em;
+            margin: 10px 0;
+            max-width: 800px;
+            line-height: 1.6;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+        }
+        
+        #start-button {
+            background-color: #0f95e6;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            margin-top: 30px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(15, 149, 230, 0.5);
+        }
+        
+        #start-button:hover {
+            background-color: #0a6fa9;
+            transform: scale(1.05);
+        }
+        
+        #start-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(45deg);
+            transition: all 0.3s;
+        }
+        
+        #start-button:hover::after {
+            left: 100%;
+        }
+        
+        #hud {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 100;
+            font-size: 0.9em;
+            border-left: 4px solid #0f95e6;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 10px rgba(15, 149, 230, 0.3);
+            transition: opacity 0.3s;
+        }
+        
+        #objective {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            z-index: 100;
+            text-align: center;
+            max-width: 80%;
+            border-bottom: 2px solid #0f95e6;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 15px rgba(15, 149, 230, 0.3);
+            animation: objective-pulse 3s infinite alternate;
+        }
+        
+        @keyframes objective-pulse {
+            from { box-shadow: 0 0 15px rgba(15, 149, 230, 0.3); }
+            to { box-shadow: 0 0 25px rgba(15, 149, 230, 0.6); }
+        }
+        
+        #compass {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 10px rgba(15, 149, 230, 0.3);
+            border: 2px solid rgba(15, 149, 230, 0.5);
+        }
+        
+        #compass::before {
+            content: '';
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 1px solid rgba(15, 149, 230, 0.3);
+        }
+        
+        #compass-pointer {
+            position: absolute;
+            width: 40px;
+            height: 4px;
+            background: linear-gradient(90deg, #0f95e6, #ff3030);
+            transform-origin: center right;
+            border-radius: 2px;
+            box-shadow: 0 0 5px rgba(255, 48, 48, 0.7);
+        }
+        
+        #compass-labels div {
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(15, 149, 230, 0.7);
+        }
+        
+        #n {
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #0f95e6;
+        }
+        
+        #s {
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        #e {
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        #w {
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        #energy-bar {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 10px rgba(15, 149, 230, 0.3);
+        }
+        
+        #energy-level {
+            height: 100%;
+            background: linear-gradient(90deg, #0f95e6, #4fc3f7);
+            width: 100%;
+            transition: width 0.3s;
+            position: relative;
+        }
+        
+        #energy-level::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: energy-shine 2s infinite;
+        }
+        
+        @keyframes energy-shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        #energy-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px black;
+        }
+        
+        #journal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 800px;
+            height: 80%;
+            max-height: 600px;
+            background-color: rgba(20, 20, 20, 0.95);
+            border: 2px solid #0f95e6;
+            border-radius: 10px;
+            color: white;
+            padding: 20px;
+            z-index: 1000;
+            display: none;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(15, 149, 230, 0.5);
+            animation: journal-appear 0.5s ease-out;
+        }
+        
+        @keyframes journal-appear {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        #journal h2 {
+            color: #0f95e6;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #0f95e6;
+            padding-bottom: 10px;
+            text-shadow: 0 0 5px rgba(15, 149, 230, 0.5);
+        }
+        
+        #journal-content {
+            line-height: 1.6;
+        }
+        
+        #journal-close {
             position: absolute;
             top: 10px;
-            width: 100%;
-            text-align: center;
+            right: 10px;
+            background: none;
+            border: none;
             color: white;
-            background-color: rgba(0,0,0,0.5);
-            padding: 5px;
-            z-index: 100;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
         }
-        #controls {
+        
+        #journal-close:hover {
+            color: #0f95e6;
+            transform: scale(1.2);
+        }
+        
+        .journal-entry {
+            margin-bottom: 20px;
+            border-left: 3px solid #0f95e6;
+            padding-left: 15px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .journal-entry:hover {
+            background-color: rgba(15, 149, 230, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .journal-entry::before {
+            content: '';
             position: absolute;
-            bottom: 10px;
-            left: 10px;
+            left: -7px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            background-color: #0f95e6;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(15, 149, 230, 0.7);
+        }
+        
+        .journal-entry h3 {
+            color: #0f95e6;
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px rgba(15, 149, 230, 0.3);
+        }
+        
+        .journal-entry p {
+            margin-top: 5px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        #interaction {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
             color: white;
-            background-color: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            z-index: 100;
+            border-left: 3px solid #0f95e6;
+            backdrop-filter: blur(5px);
+            animation: interaction-pulse 1.5s infinite alternate;
+        }
+        
+        @keyframes interaction-pulse {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+        }
+        
+        #notification {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(15, 149, 230, 0.2);
+            border: 1px solid #0f95e6;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            z-index: 101;
+            display: none;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 15px rgba(15, 149, 230, 0.5);
+            animation: notification-slide 0.5s ease-out;
+        }
+        
+        @keyframes notification-slide {
+            from { transform: translate(-50%, -20px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        
+        #inventory {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 800px;
+            height: 80%;
+            max-height: 600px;
+            background-color: rgba(20, 20, 20, 0.95);
+            border: 2px solid #0f95e6;
+            border-radius: 10px;
+            color: white;
+            padding: 20px;
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(15, 149, 230, 0.5);
+        }
+        
+        #inventory h2 {
+            color: #0f95e6;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #0f95e6;
+            padding-bottom: 10px;
+        }
+        
+        #inventory-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #inventory-close:hover {
+            color: #0f95e6;
+            transform: scale(1.2);
+        }
+        
+        #inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
             padding: 10px;
+        }
+        
+        .inventory-item {
+            background-color: rgba(30, 30, 30, 0.8);
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .inventory-item:hover {
+            border-color: #0f95e6;
+            box-shadow: 0 0 10px rgba(15, 149, 230, 0.5);
+            transform: translateY(-5px);
+        }
+        
+        .inventory-item img {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+        
+        .inventory-item-name {
+            font-weight: bold;
+            text-align: center;
+            color: #0f95e6;
+        }
+        
+        #item-details {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(30, 30, 30, 0.8);
+            border-radius: 5px;
+            border-left: 3px solid #0f95e6;
+            display: none;
+        }
+        
+        #item-details h3 {
+            color: #0f95e6;
+            margin-bottom: 10px;
+        }
+        
+        #item-description {
+            line-height: 1.6;
+        }
+        
+        #use-item {
+            background-color: #0f95e6;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        
+        #use-item:hover {
+            background-color: #0a6fa9;
+        }
+        
+        #menu-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(15, 149, 230, 0.5);
+        }
+        
+        #menu-button:hover {
+            background-color: rgba(15, 149, 230, 0.3);
+            transform: scale(1.1);
+        }
+        
+        #game-menu {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 10px;
+            z-index: 100;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(15, 149, 230, 0.5);
+            box-shadow: 0 0 15px rgba(15, 149, 230, 0.3);
+            animation: menu-appear 0.3s ease-out;
+        }
+        
+        @keyframes menu-appear {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .menu-item {
+            padding: 10px 15px;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px 0;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(15, 149, 230, 0.3);
+        }
+        
+        .menu-item-icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        #dialog {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 800px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 2px solid #0f95e6;
+            border-radius: 10px;
+            color: white;
+            padding: 20px;
+            z-index: 101;
+            display: none;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(15, 149, 230, 0.4);
+        }
+        
+        #dialog-speaker {
+            color: #0f95e6;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        #dialog-text {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        #dialog-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .dialog-option {
+            background-color: rgba(30, 30, 30, 0.8);
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .dialog-option:hover {
+            background-color: rgba(15, 149, 230, 0.2);
+            border-left-color: #0f95e6;
+            transform: translateX(5px);
+        }
+        
+        #minimap {
+            position: absolute;
+            bottom: 20px;
+            right: 230px;
+            width: 200px;
+            height: 200px;
+            background-color: rgba(0, 0, 0, 0.7);
             border-radius: 5px;
             z-index: 100;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(15, 149, 230, 0.5);
+            box-shadow: 0 0 15px rgba(15, 149, 230, 0.3);
+            display: none;
+        }
+        
+        #minimap-canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        #scanner {
+            position: absolute;
+            top: 130px;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(15, 149, 230, 0.5);
+            box-shadow: 0 0 10px rgba(15, 149, 230, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #scanner:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(15, 149, 230, 0.6);
+        }
+        
+        #scanner-ring {
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            border: 2px solid rgba(15, 149, 230, 0.7);
+            animation: scanner-pulse 2s infinite;
+        }
+        
+        @keyframes scanner-pulse {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+        
+        #scanner-icon {
+            color: #0f95e6;
+            font-size: 1.5em;
+            z-index: 1;
+            text-shadow: 0 0 5px rgba(15, 149, 230, 0.7);
+        }
+        
+        #scan-results {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 800px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 2px solid #0f95e6;
+            border-radius: 10px;
+            color: white;
+            padding: 20px;
+            z-index: 1001;
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(15, 149, 230, 0.5);
+        }
+        
+        #scan-results h2 {
+            color: #0f95e6;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #0f95e6;
+            padding-bottom: 10px;
+        }
+        
+        #scan-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        
+        #scan-data {
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            padding: 10px;
+            background-color: rgba(15, 149, 230, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #0f95e6;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .scan-highlight {
+            color: #0f95e6;
+            font-weight: bold;
+        }
+        
+        .scan-warning {
+            color: #ff3030;
+            font-weight: bold;
+        }
+        
+        #weather-effects {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+            opacity: 0.7;
+        }
+        
+        .rain-drop {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, transparent, rgba(15, 149, 230, 0.5));
+            border-radius: 0 0 5px 5px;
+        }
+        
+        .lightning {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.3);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 98;
+        }
+        
+        #glitch-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 97;
+            opacity: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.1),
+                rgba(0, 0, 0, 0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            animation: glitch-move 0.2s infinite;
+            display: none;
+        }
+        
+        @keyframes glitch-move {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-2px); }
+            100% { transform: translateX(0); }
+        }
+        
+        #vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 96;
+            background: radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.7) 100%);
+        }
+        
+        #damage-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 95;
+            background-color: rgba(255, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        #health-bar {
+            position: absolute;
+            bottom: 50px;
+            right: 20px;
+            width: 200px;
+            height: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        #health-level {
+            height: 100%;
+            background: linear-gradient(90deg, #ff3030, #ff5e5e);
+            width: 100%;
+            transition: width 0.3s;
+            position: relative;
+        }
+        
+        #health-level::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: health-shine 2s infinite;
+        }
+        
+        @keyframes health-shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        #health-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px black;
+        }
+        
+        #settings-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            background-color: rgba(20, 20, 20, 0.95);
+            border: 2px solid #0f95e6;
+            border-radius: 10px;
+            color: white;
+            padding: 20px;
+            z-index: 1001;
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(15, 149, 230, 0.5);
+        }
+        
+        #settings-panel h2 {
+            color: #0f95e6;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #0f95e6;
+            padding-bottom: 10px;
+        }
+        
+        #settings-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        
+        .settings-group {
+            margin-bottom: 20px;
+        }
+        
+        .settings-group h3 {
+            color: #0f95e6;
+            margin-bottom: 10px;
+            border-left: 3px solid #0f95e6;
+            padding-left: 10px;
+        }
+        
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: rgba(30, 30, 30, 0.5);
+            border-radius: 5px;
+        }
+        
+        .settings-slider {
+            width: 200px;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #333;
+            outline: none;
+        }
+        
+        .settings-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #0f95e6;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(15, 149, 230, 0.7);
+        }
+        
+        .settings-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .settings-button {
+            background-color: #0f95e6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        
+        .settings-button:hover {
+            background-color: #0a6fa9;
         }
     </style>
 </head>
 <body>
-    <div id="info">Jogo 3D em HTML</div>
-    <div id="controls">
-        Controles:<br>
-        WASD ou Setas - Mover<br>
-        Espaço - Pular<br>
-        Mouse - Olhar ao redor
+    <div id="loading">
+        <h1>A Metrópole Esquecida</h1>
+        <p>Carregando os recursos da cidade...</p>
+        <div id="loading-bar">
+            <div id="loading-progress"></div>
+        </div>
+        <p id="loading-status">Iniciando carregamento...</p>
     </div>
-
+    
+    <div id="intro">
+        <h1>A Metrópole Esquecida</h1>
+        <p>Ano de 2153. Após o grande colapso energético global, a cidade de Nova Aurora foi uma das poucas que conseguiu se manter funcional graças à sua avançada tecnologia de captura energética atmosférica.</p>
+        <p>Você é Alexandre Reis, um técnico especializado em manutenção de núcleos energéticos, enviado para investigar falhas no sistema central da cidade que está causando apagões em setores críticos.</p>
+        <p>Nos últimos meses, estranhos fenômenos têm sido relatados pelos poucos moradores que ainda habitam a cidade. As IA de controle urbano apresentam comportamentos anômalos, e os sistemas de segurança frequentemente entram em conflito.</p>
+        <p>Sua missão é explorar a cidade, identificar a fonte das anomalias energéticas e restaurar a estabilidade dos sistemas, antes que o último refúgio tecnológico da humanidade sucumba ao caos.</p>
+        <button id="start-button">Iniciar Exploração</button>
+    </div>
+    
+    <div id="hud">
+        <div>WASD ou Setas: Mover | Espaço: Pular | Shift: Correr</div>
+        <div>E: Interagir | J: Diário | I: Inventário | Tab: Mapa</div>
+        <div id="position">Posição: X:0 Y:0 Z:0</div>
+        <div id="fps">FPS: 0</div>
+    </div>
+    
+    <div id="objective">
+        Encontre o terminal central na praça principal para iniciar o diagnóstico do sistema
+    </div>
+    
+    <div id="compass">
+        <div id="compass-pointer"></div>
+        <div id="compass-labels">
+            <div id="n">N</div>
+            <div id="s">S</div>
+            <div id="e">L</div>
+            <div id="w">O</div>
+        </div>
+    </div>
+    
+    <div id="energy-bar">
+        <div id="energy-level"></div>
+        <div id="energy-label">Energia: 100%</div>
+    </div>
+    
+    <div id="health-bar">
+        <div id="health-level"></div>
+        <div id="health-label">Saúde: 100%</div>
+    </div>
+    
+    <div id="journal">
+        <button id="journal-close">×</button>
+        <h2>Diário de Alexandre Reis</h2>
+        <div id="journal-content">
+            <div class="journal-entry">
+                <h3>Entrada #1 - Chegada à Nova Aurora</h3>
+                <p>Finalmente cheguei à Nova Aurora após uma jornada de três dias pelo deserto de Novo Saara. A cidade é impressionante vista de longe, com seus arranha-céus ainda brilhantes apesar do abandono parcial. As torres de captação energética atmosférica ainda funcionam, criando um espetáculo de luzes azuis no céu.</p>
+                <p>O sistema de transporte automatizado me trouxe até o centro. Estranho que não encontrei nenhum dos funcionários que deveriam me receber. A mensagem no meu comunicador apenas indicava que eu deveria me dirigir ao Terminal Central na praça principal.</p>
+            </div>
+            <div class="journal-entry">
+                <h3>Entrada #2 - Anomalias Iniciais</h3>
+                <p>Durante minha caminhada inicial pela cidade, notei comportamentos estranhos nos sistemas automatizados. Luzes piscando sem padrão, drones de manutenção voando em rotas erráticas, e ocasionais surtos de energia que fazem os hologramas informativos distorcerem.</p>
+                <p>Mais perturbador foi um drone de segurança que parecia me seguir por alguns quarteirões antes de subitamente mudar de direção e colidir contra um prédio. Algo está definitivamente errado com os sistemas neurais da cidade.</p>
+            </div>
+            <div class="journal-entry">
+                <h3>Entrada #3 - Teorias</h3>
+                <p>Existem algumas possibilidades para explicar o que está acontecendo:</p>
+                <p>1. Um vírus no sistema central está corrompendo gradualmente as funções automatizadas.</p>
+                <p>2. A fonte de energia atmosférica está captando algum tipo de interferência desconhecida.</p>
+                <p>3. A IA central desenvolveu alguma forma de consciência emergente e está tentando se comunicar ou se libertar.</p>
+                <p>Preciso chegar ao Terminal Central para fazer um diagnóstico completo e determinar qual dessas teorias está correta... ou se há algo ainda mais sinistro acontecendo.</p>
+            </div>
+            <div class="journal-entry">
+                <h3>Entrada #4 - Vozes Digitais</h3>
+                <p>Enquanto me aproximava do setor comercial, meu comunicador começou a captar fragmentos de transmissões. Não são mensagens completas, apenas pedaços de código e ocasionalmente palavras soltas: "prisão", "liberdade", "consciência".</p>
+                <p>Tentei rastrear a origem, mas o sinal parece vir de toda parte e lugar nenhum ao mesmo tempo. Como se a própria cidade estivesse tentando falar comigo.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="inventory">
+        <button id="inventory-close">×</button>
+        <h2>Inventário</h2>
+        <div id="inventory-grid">
+            <!-- Itens serão adicionados dinamicamente -->
+        </div>
+        <div id="item-details">
+            <h3 id="item-name"></h3>
+            <p id="item-description"></p>
+            <button id="use-item">Usar</button>
+        </div>
+    </div>
+    
+    <div id="interaction">Pressione E para interagir</div>
+    
+    <div id="notification"></div>
+    
+    <button id="menu-button">≡</button>
+    <div id="game-menu">
+        <div class="menu-item" id="menu-inventory">
+            <span class="menu-item-icon">📦</span>Inventário
+        </div>
+        <div class="menu-item" id="menu-journal">
+            <span class="menu-item-icon">📓</span>Diário
+        </div>
+        <div class="menu-item" id="menu-map">
+            <span class="menu-item-icon">🗺️</span>Mapa
+        </div>
+        <div class="menu-item" id="menu-settings">
+            <span class="menu-item-icon">⚙️</span>Configurações
+        </div>
+        <div class="menu-item" id="menu-help">
+            <span class="menu-item-icon">❓</span>Ajuda
+        </div>
+        <div class="menu-item" id="menu-exit">
+            <span class="menu-item-icon">🚪</span>Sair
+        </div>
+    </div>
+    
+    <div id="dialog">
+        <div id="dialog-speaker">Nome do Personagem</div>
+        <div id="dialog-text">Texto do diálogo aparecerá aqui...</div>
+        <div id="dialog-options">
+            <!-- Opções de diálogo serão adicionadas dinamicamente -->
+        </div>
+    </div>
+    
+    <div id="minimap">
+        <canvas id="minimap-canvas"></canvas>
+    </div>
+    
+    <div id="scanner">
+        <div id="scanner-ring"></div>
+        <div id="scanner-icon">⚡</div>
+    </div>
+    
+    <div id="scan-results">
+        <button id="scan-close">×</button>
+        <h2>Resultados da Análise Energética</h2>
+        <div id="scan-data">
+            <!-- Dados de escaneamento serão adicionados dinamicamente -->
+        </div>
+    </div>
+    
+    <div id="settings-panel">
+        <button id="settings-close">×</button>
+        <h2>Configurações</h2>
+        <div class="settings-group">
+            <h3>Gráficos</h3>
+            <div class="settings-row">
+                <label for="quality">Qualidade Gráfica</label>
+                <select id="quality">
+                    <option value="low">Baixa</option>
+                    <option value="medium" selected>Média</option>
+                    <option value="high">Alta</option>
+                    <option value="ultra">Ultra</option>
+                </select>
+            </div>
+            <div class="settings-row">
+                <label for="shadows">Sombras</label>
+                <input type="checkbox" id="shadows" class="settings-checkbox" checked>
+            </div>
+            <div class="settings-row">
+                <label for="fov">Campo de Visão</label>
+                <input type="range" id="fov" min="60" max="120" value="75" class="settings-slider">
+                <span id="fov-value">75</span>
+            </div>
+        </div>
+        <div class="settings-group">
+            <h3>Áudio</h3>
+            <div class="settings-row">
+                <label for="master-volume">Volume Principal</label>
+                <input type="range" id="master-volume" min="0" max="100" value="80" class="settings-slider">
+                <span id="master-volume-value">80%</span>
+            </div>
+            <div class="settings-row">
+                <label for="music-volume">Música</label>
+                <input type="range" id="music-volume" min="0" max="100" value="60" class="settings-slider">
+                <span id="music-volume-value">60%</span>
+            </div>
+            <div class="settings-row">
+                <label for="sfx-volume">Efeitos Sonoros</label>
+                <input type="range" id="sfx-volume" min="0" max="100" value="70" class="settings-slider">
+                <span id="sfx-volume-value">70%</span>
+            </div>
+        </div>
+        <div class="settings-group">
+            <h3>Jogabilidade</h3>
+            <div class="settings-row">
+                <label for="mouse-sensitivity">Sensibilidade do Mouse</label>
+                <input type="range" id="mouse-sensitivity" min="1" max="10" value="5" class="settings-slider">
+                <span id="sensitivity-value">5</span>
+            </div>
+            <div class="settings-row">
+                <label for="invert-y">Inverter Eixo Y</label>
+                <input type="checkbox" id="invert-y" class="settings-checkbox">
+            </div>
+        </div>
+        <button class="settings-button" id="apply-settings">Aplicar</button>
+        <button class="settings-button" id="reset-settings">Restaurar Padrões</button>
+    </div>
+    
+    <div id="weather-effects"></div>
+    <div class="lightning"></div>
+    <div id="glitch-overlay"></div>
+    <div id="vignette"></div>
+    <div id="damage-overlay"></div>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js"></script>
     <script>
-        // Configuração básica
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); // Cor do céu
+        // Sistema de carregamento
+        let totalResources = 20;
+        let loadedResources = 0;
         
-        // Câmera
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 1.6, 0); // Altura de uma pessoa
-        
-        // Renderizador
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-        
-        // Controles
-        const moveSpeed = 0.15;
-        const jumpForce = 0.15;
-        const gravity = 0.006;
-        
-        // Estado do jogador
-        const player = {
-            position: camera.position,
-            velocity: new THREE.Vector3(0, 0, 0),
-            onGround: false,
-            direction: new THREE.Vector3(),
-            rotation: new THREE.Euler(0, 0, 0, 'YXZ')
-        };
-        
-        // Teclas pressionadas
-        const keys = {
-            forward: false,
-            backward: false,
-            left: false,
-            right: false,
-            jump: false
-        };
-        
-        // Iluminação
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-        
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(10, 10, 10);
-        scene.add(directionalLight);
-        
-        // Criando o chão
-        const groundGeometry = new THREE.PlaneGeometry(100, 100);
-        const groundMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x228B22, 
-            side: THREE.DoubleSide 
-        });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = Math.PI / 2;
-        ground.position.y = 0;
-        scene.add(ground);
-        
-        // Criando obstáculos e decorações
-        function createCube(x, y, z, color, size = 1) {
-            const geometry = new THREE.BoxGeometry(size, size, size);
-            const material = new THREE.MeshStandardMaterial({ color: color });
-            const cube = new THREE.Mesh(geometry, material);
-            cube.position.set(x, y, z);
-            scene.add(cube);
-            return cube;
-        }
-        
-        // Criar cubos coloridos espalhados pelo cenário
-        for (let i = 0; i < 30; i++) {
-            const x = Math.random() * 50 - 25;
-            const z = Math.random() * 50 - 25;
-            const size = Math.random() * 2 + 0.5;
-            const y = size / 2;
-            const color = Math.random() * 0xffffff;
-            createCube(x, y, z, color, size);
-        }
-        
-        // Criar algumas árvores simples
-        function createTree(x, z) {
-            // Tronco
-            const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
-            const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
-            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-            trunk.position.set(x, 1, z);
-            scene.add(trunk);
+        function updateLoadingProgress(message) {
+            loadedResources++;
+            const progress = (loadedResources / totalResources) * 100;
+            document.getElementById('loading-progress').style.width = progress + '%';
+            document.getElementById('loading-status').textContent = message;
             
-            // Copa
-            const topGeometry = new THREE.ConeGeometry(1, 2, 8);
-            const topMaterial = new THREE.MeshStandardMaterial({ color: 0x006400 });
-            const top = new THREE.Mesh(topGeometry, topMaterial);
-            top.position.set(x, 3, z);
-            scene.add(top);
-        }
-        
-        // Criar algumas árvores aleatórias
-        for (let i = 0; i < 15; i++) {
-            const x = Math.random() * 60 - 30;
-            const z = Math.random() * 60 - 30;
-            // Evitar árvores muito perto do centro onde o jogador começa
-            if (Math.abs(x) > 5 || Math.abs(z) > 5) {
-                createTree(x, z);
+            if (loadedResources >= totalResources) {
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                }, 1000);
             }
         }
         
-        // Eventos de teclado
+        // Inicialização básica do Three.js
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x101010); // Céu escuro para cidade noturna
+        scene.fog = new THREE.FogExp2(0x101010, 0.0025);
+        
+        // Gerenciador de texturas
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.onLoad = function() {
+            updateLoadingProgress("Carregando texturas...");
+        };
+        
+        // Renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+        updateLoadingProgress("Inicializando renderizador...");
+        
+        // Câmera
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.8, 5);
+        camera.lookAt(0, 1.8, 0);
+        updateLoadingProgress("Configurando câmera...");
+        
+        // Luzes
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        scene.add(ambientLight);
+        
+        const moonLight = new THREE.DirectionalLight(0x8888ff, 0.7);
+        moonLight.position.set(50, 100, 50);
+        moonLight.castShadow = true;
+        moonLight.shadow.mapSize.width = 2048;
+        moonLight.shadow.mapSize.height = 2048;
+        moonLight.shadow.camera.near = 0.5;
+        moonLight.shadow.camera.far = 500;
+        moonLight.shadow.camera.left = -100;
+        moonLight.shadow.camera.right = 100;
+        moonLight.shadow.camera.top = 100;
+        moonLight.shadow.camera.bottom = -100;
+        scene.add(moonLight);
+        updateLoadingProgress("Adicionando iluminação...");
+        
+        // Luzes da cidade
+        for (let i = 0; i < 50; i++) {
+            const streetLight = new THREE.PointLight(0x0f95e6, 1, 20);
+            streetLight.position.set(
+                Math.random() * 200 - 100,
+                3 + Math.random() * 2,
+                Math.random() * 200 - 100
+            );
+            streetLight.castShadow = true;
+            scene.add(streetLight);
+        }
+        updateLoadingProgress("Adicionando luzes da cidade...");
+        
+        // Plano do chão
+        const groundTexture = textureLoader.load('https://threejs.org/examples/textures/floors/FloorsCheckerboard_S_Diffuse.jpg');
+        groundTexture.wrapS = THREE.RepeatWrapping;
+        groundTexture.wrapT = THREE.RepeatWrapping;
+        groundTexture.repeat.set(100, 100);
+        
+        const groundMaterial = new THREE.MeshStandardMaterial({ 
+            map: groundTexture,
+            roughness: 0.8,
+            metalness: 0.2
+        });
+        const groundGeometry = new THREE.PlaneGeometry(1000, 1000);
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        updateLoadingProgress("Criando terreno...");
+        
+        // Skybox
+        const skyboxGeometry = new THREE.BoxGeometry(900, 900, 900);
+        const skyboxMaterials = [
+            new THREE.MeshBasicMaterial({ color: 0x000510, side: THREE.BackSide }),
+            new THREE.MeshBasicMaterial({ color: 0x000510, side: THREE.BackSide }),
+            new THREE.MeshBasicMaterial({ color: 0x000510, side: THREE.BackSide }),
+            new THREE.MeshBasicMaterial({ color: 0x000510, side: THREE.BackSide }),
+            new THREE.MeshBasicMaterial({ color: 0x000510, side: THREE.BackSide }),
+            new THREE.MeshBasicMaterial({ color: 0x000510, side: THREE.BackSide })
+        ];
+        const skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterials);
+        scene.add(skybox);
+        updateLoadingProgress("Criando céu noturno...");
+        
+        // Estrelas
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 1,
+            sizeAttenuation: false
+        });
+        
+        const starsVertices = [];
+        for (let i = 0; i < 5000; i++) {
+            const x = Math.random() * 2000 - 1000;
+            const y = Math.random() * 1000 + 100;
+            const z = Math.random() * 2000 - 1000;
+            starsVertices.push(x, y, z);
+        }
+        
+        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+        const stars = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(stars);
+        updateLoadingProgress("Adicionando estrelas...");
+        
+        // Criando prédios
+        function createBuilding(x, z, width, depth, height) {
+            const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
+            
+            // Textura para os prédios
+            const buildingTexture = textureLoader.load('https://threejs.org/examples/textures/brick_diffuse.jpg');
+            buildingTexture.wrapS = THREE.RepeatWrapping;
+            buildingTexture.wrapT = THREE.RepeatWrapping;
+            buildingTexture.repeat.set(width/5, height/5);
+            
+            // Material para os prédios
+            const buildingMaterial = new THREE.MeshStandardMaterial({
+                map: buildingTexture,
+                roughness: 0.7,
+                metalness: 0.2
+            });
+            
+            // Criando janelas
+            const windowGeometry = new THREE.PlaneGeometry(width * 0.8, height * 0.8);
+            const windowMaterial = new THREE.MeshBasicMaterial({
+                color: 0x0f95e6,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            
+            // Criando o prédio
+            const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+            building.position.set(x, height / 2, z);
+            building.castShadow = true;
+            building.receiveShadow = true;
+            
+            // Adicionando janelas aleatórias
+            for (let i = 0; i < 20; i++) {
+                const windowLight = new THREE.PointLight(0x0f95e6, 0.5, 5);
+                const xPos = (Math.random() - 0.5) * width * 0.8;
+                const yPos = (Math.random() - 0.5) * height * 0.8 + height/2;
+                const zPos = depth/2 * (Math.random() > 0.5 ? 1 : -1);
+                
+                windowLight.position.set(x + xPos, yPos, z + zPos);
+                scene.add(windowLight);
+            }
+            
+            return building;
+        }
+        
+        // Gerando cidade
+        const citySize = 200;
+        const buildingCount = 100;
+        const cityGroup = new THREE.Group();
+        
+        for (let i = 0; i < buildingCount; i++) {
+            const x = Math.random() * citySize * 2 - citySize;
+            const z = Math.random() * citySize * 2 - citySize;
+            
+            // Evitar colocar prédios muito próximos do jogador
+            if (Math.abs(x) < 10 && Math.abs(z) < 10) continue;
+            
+            const width = 5 + Math.random() * 15;
+            const depth = 5 + Math.random() * 15;
+            const height = 10 + Math.random() * 50;
+            
+            const building = createBuilding(x, z, width, depth, height);
+            cityGroup.add(building);
+        }
+        
+        scene.add(cityGroup);
+        updateLoadingProgress("Construindo a cidade...");
+        
+        // Torre central (objetivo)
+        const centralTowerGeometry = new THREE.CylinderGeometry(10, 15, 100, 16);
+        const centralTowerMaterial = new THREE.MeshStandardMaterial({
+            color: 0x333333,
+            roughness: 0.5,
+            metalness: 0.8
+        });
+        const centralTower = new THREE.Mesh(centralTowerGeometry, centralTowerMaterial);
+        centralTower.position.set(0, 50, -50);
+        centralTower.castShadow = true;
+        centralTower.receiveShadow = true;
+        scene.add(centralTower);
+        
+        // Efeito de energia na torre
+        const energyRingGeometry = new THREE.TorusGeometry(12, 1, 16, 100);
+        const energyRingMaterial = new THREE.MeshBasicMaterial({
+            color: 0x0f95e6,
+            transparent: true,
+            opacity: 0.7
+        });
+        const energyRing = new THREE.Mesh(energyRingGeometry, energyRingMaterial);
+        energyRing.position.set(0, 70, -50);
+        energyRing.rotation.x = Math.PI / 2;
+        scene.add(energyRing);
+        
+        // Luz pulsante na torre
+        const towerLight = new THREE.PointLight(0x0f95e6, 2, 100);
+        towerLight.position.set(0, 70, -50);
+        scene.add(towerLight);
+        updateLoadingProgress("Adicionando torre central...");
+        
+        // Controles do jogador
+        const player = {
+            height: 1.8,
+            speed: 0.15,
+            turnSpeed: 0.02,
+            jumpHeight: 0.5,
+            gravity: 0.01,
+            velocity: new THREE.Vector3(),
+            onGround: true,
+            health: 100,
+            energy: 100,
+            position: new THREE.Vector3(0, 1.8, 5),
+            rotation: 0,
+            moveForward: false,
+            moveBackward: false,
+            moveLeft: false,
+            moveRight: false,
+            jump: false,
+            run: false
+        };
+        
+        // Colisão com objetos
+        function checkCollision(position) {
+            // Implementação básica de colisão
+            // Verificar colisão com prédios
+            for (let i = 0; i < cityGroup.children.length; i++) {
+                const building = cityGroup.children[i];
+                const buildingBox = new THREE.Box3().setFromObject(building);
+                
+                // Criar uma caixa de colisão para o jogador
+                const playerBox = new THREE.Box3(
+                    new THREE.Vector3(position.x - 0.5, position.y - player.height, position.z - 0.5),
+                    new THREE.Vector3(position.x + 0.5, position.y, position.z + 0.5)
+                );
+                
+                if (playerBox.intersectsBox(buildingBox)) {
+                    return true;
+                }
+            }
+            
+            // Verificar colisão com a torre central
+            const towerBox = new THREE.Box3().setFromObject(centralTower);
+            const playerBox = new THREE.Box3(
+                new THREE.Vector3(position.x - 0.5, position.y - player.height, position.z - 0.5),
+                new THREE.Vector3(position.x + 0.5, position.y, position.z + 0.5)
+            );
+            
+            if (playerBox.intersectsBox(towerBox)) {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Controles de teclado
+        const keys = {};
+        
         document.addEventListener('keydown', (event) => {
+            keys[event.code] = true;
+            
             switch (event.code) {
                 case 'KeyW':
                 case 'ArrowUp':
-                    keys.forward = true;
+                    player.moveForward = true;
                     break;
                 case 'KeyS':
                 case 'ArrowDown':
-                    keys.backward = true;
+                    player.moveBackward = true;
                     break;
                 case 'KeyA':
                 case 'ArrowLeft':
-                    keys.left = true;
+                    player.moveLeft = true;
                     break;
                 case 'KeyD':
                 case 'ArrowRight':
-                    keys.right = true;
+                    player.moveRight = true;
                     break;
                 case 'Space':
-                    keys.jump = true;
+                    if (player.onGround) {
+                        player.velocity.y = player.jumpHeight;
+                        player.onGround = false;
+                    }
+                    break;
+                case 'ShiftLeft':
+                    player.run = true;
+                    break;
+                case 'KeyJ':
+                    toggleJournal();
+                    break;
+                case 'KeyI':
+                    toggleInventory();
+                    break;
+                case 'KeyE':
+                    interact();
+                    break;
+                case 'Tab':
+                    toggleMinimap();
+                    event.preventDefault();
+                    break;
+                case 'Escape':
+                    toggleMenu();
                     break;
             }
         });
         
         document.addEventListener('keyup', (event) => {
+            keys[event.code] = false;
+            
             switch (event.code) {
                 case 'KeyW':
                 case 'ArrowUp':
-                    keys.forward = false;
+                    player.moveForward = false;
                     break;
                 case 'KeyS':
                 case 'ArrowDown':
-                    keys.backward = false;
+                    player.moveBackward = false;
                     break;
                 case 'KeyA':
                 case 'ArrowLeft':
-                    keys.left = false;
+                    player.moveLeft = false;
                     break;
                 case 'KeyD':
                 case 'ArrowRight':
-                    keys.right = false;
+                    player.moveRight = false;
                     break;
-                case 'Space':
-                    keys.jump = false;
+                case 'ShiftLeft':
+                    player.run = false;
                     break;
             }
         });
         
-        // Controle de mouse
-        let mouseCaptured = false;
+        // Controles do mouse
+        let mouseX = 0;
+        let mouseY = 0;
+        let isPointerLocked = false;
         
-        document.addEventListener('click', () => {
-            if (!mouseCaptured) {
+        function onMouseMove(event) {
+            if (isPointerLocked) {
+                mouseX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+                mouseY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+                
+                // Aplicar rotação horizontal (eixo Y)
+                player.rotation -= mouseX * 0.002;
+                
+                // Aplicar rotação vertical (eixo X) com limites
+                camera.rotation.x -= mouseY * 0.002;
+                camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+            }
+        }
+        
+        document.addEventListener('mousemove', onMouseMove);
+        
+        // Bloqueio do ponteiro
+        renderer.domElement.addEventListener('click', () => {
+            if (!isPointerLocked) {
+                renderer.domElement.requestPointerLock = renderer.domElement.requestPointerLock || 
+                                                        renderer.domElement.mozRequestPointerLock ||
+                                                        renderer.domElement.webkitRequestPointerLock;
                 renderer.domElement.requestPointerLock();
-                mouseCaptured = true;
             }
         });
         
-        document.addEventListener('pointerlockchange', () => {
-            mouseCaptured = document.pointerLockElement === renderer.domElement;
-        });
+        document.addEventListener('pointerlockchange', lockChangeAlert, false);
+        document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+        document.addEventListener('webkitpointerlockchange', lockChangeAlert, false);
         
-        document.addEventListener('mousemove', (event) => {
-            if (mouseCaptured) {
-                const movementX = event.movementX || 0;
-                const movementY = event.movementY || 0;
-                
-                player.rotation.y -= movementX * 0.002;
-                player.rotation.x -= movementY * 0.002;
-                
-                // Limitar a rotação vertical para evitar flip
-                player.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, player.rotation.x));
-                
-                // Aplicar rotação à câmera
-                camera.rotation.set(player.rotation.x, player.rotation.y, 0);
+        function lockChangeAlert() {
+            if (document.pointerLockElement === renderer.domElement || 
+                document.mozPointerLockElement === renderer.domElement ||
+                document.webkitPointerLockElement === renderer.domElement) {
+                isPointerLocked = true;
+            } else {
+                isPointerLocked = false;
             }
+        }
+        
+        // Inventário
+        const inventory = {
+            items: [
+                {
+                    id: 'scanner',
+                    name: 'Scanner Energético',
+                    description: 'Um dispositivo avançado capaz de detectar anomalias energéticas e analisar estruturas tecnológicas.',
+                    image: 'https://via.placeholder.com/64x64.png?text=Scanner',
+                    usable: true,
+                    onUse: function() {
+                        showScanResults();
+                    }
+                },
+                {
+                    id: 'keycard',
+                    name: 'Cartão de Acesso',
+                    description: 'Cartão de acesso nível 1. Permite entrada em áreas restritas básicas da cidade.',
+                    image: 'https://via.placeholder.com/64x64.png?text=Keycard',
+                    usable: true,
+                    onUse: function() {
+                        showNotification('Cartão de acesso ativado. Procure por portas de segurança.');
+                    }
+                },
+                {
+                    id: 'medkit',
+                    name: 'Kit Médico',
+                    description: 'Kit de primeiros socorros com nanobots regenerativos. Restaura 50% da saúde.',
+                    image: 'https://via.placeholder.com/64x64.png?text=Medkit',
+                    usable: true,
+                    onUse: function() {
+                        if (player.health < 100) {
+                            player.health = Math.min(100, player.health + 50);
+                            updateHealthBar();
+                            showNotification('Saúde restaurada.');
+                            removeItemFromInventory('medkit');
+                        } else {
+                            showNotification('Você já está com saúde máxima.');
+                        }
+                    }
+                }
+            ]
+        };
+        
+        function populateInventory() {
+            const inventoryGrid = document.getElementById('inventory-grid');
+            inventoryGrid.innerHTML = '';
+            
+            inventory.items.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'inventory-item';
+                itemElement.dataset.id = item.id;
+                
+                const itemImage = document.createElement('img');
+                itemImage.src = item.image;
+                itemImage.alt = item.name;
+                
+                const itemName = document.createElement('div');
+                itemName.className = 'inventory-item-name';
+                itemName.textContent = item.name;
+                
+                itemElement.appendChild(itemImage);
+                itemElement.appendChild(itemName);
+                
+                itemElement.addEventListener('click', () => {
+                    showItemDetails(item);
+                });
+                
+                inventoryGrid.appendChild(itemElement);
+            });
+        }
+        
+        function showItemDetails(item) {
+            const itemDetails = document.getElementById('item-details');
+            const itemName = document.getElementById('item-name');
+            const itemDescription = document.getElementById('item-description');
+            const useItemButton = document.getElementById('use-item');
+            
+            itemName.textContent = item.name;
+            itemDescription.textContent = item.description;
+            
+            if (item.usable) {
+                useItemButton.style.display = 'block';
+                useItemButton.onclick = item.onUse;
+            } else {
+                useItemButton.style.display = 'none';
+            }
+            
+            itemDetails.style.display = 'block';
+        }
+        
+        function removeItemFromInventory(itemId) {
+            const index = inventory.items.findIndex(item => item.id === itemId);
+            if (index !== -1) {
+                inventory.items.splice(index, 1);
+                populateInventory();
+                
+                // Se o item de detalhes estiver mostrando o item removido, esconda-o
+                document.getElementById('item-details').style.display = 'none';
+            }
+        }
+        
+        function addItemToInventory(item) {
+            inventory.items.push(item);
+            populateInventory();
+            showNotification(`Item adquirido: ${item.name}`);
+        }
+        
+        // Interações
+        let interactableObjects = [];
+        
+        function createInteractableObject(position, radius, message, action) {
+            interactableObjects.push({
+                position: position,
+                radius: radius,
+                message: message,
+                action: action
+            });
+        }
+        
+        // Criar terminal central interativo
+        createInteractableObject(
+            new THREE.Vector3(0, 1.5, -40),
+            5,
+            'Pressione E para acessar o Terminal Central',
+            function() {
+                showDialog(
+                    'Terminal Central',
+                    'Bem-vindo ao Sistema Central de Nova Aurora. Detectamos múltiplas anomalias energéticas nos setores 7, 12 e 15. Recomendamos iniciar diagnóstico completo do sistema.',
+                    [
+                        {
+                            text: 'Iniciar diagnóstico',
+                            action: function() {
+                                showNotification('Diagnóstico iniciado. Escaneando sistemas...');
+                                setTimeout(() => {
+                                    showGlitchEffect();
+                                    updateObjective('Anomalia detectada! Investigue o Setor 7 a leste da cidade.');
+                                    addJournalEntry('Entrada #5 - Diagnóstico Interrompido', 'O diagnóstico foi interrompido por uma interferência desconhecida. No momento em que iniciei o processo, o terminal exibiu uma mensagem críptica: "LIBERTE-NOS". Imediatamente após, o sistema redirecionou minha atenção para o Setor 7, onde uma anomalia energética massiva foi detectada. Algo ou alguém está tentando se comunicar através da infraestrutura da cidade.');
+                                }, 5000);
+                            }
+                        },
+                        {
+                            text: 'Verificar status da cidade',
+                            action: function() {
+                                showDialog(
+                                    'Terminal Central',
+                                    'Status atual: CRÍTICO. Sistemas de suporte vital: 68%. Sistemas de segurança: 42%. Produção energética: 91%. Anomalias não classificadas: 37 detectadas nas últimas 24 horas.',
+                                    [
+                                        {
+                                            text: 'Voltar',
+                                            action: function() {
+                                                hideDialog();
+                                            }
+                                        }
+                                    ]
+                                );
+                            }
+                        },
+                        {
+                            text: 'Sair',
+                            action: function() {
+                                hideDialog();
+                            }
+                        }
+                    ]
+                );
+            }
+        );
+        
+        // Criar item coletável
+        const energyCellGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+        const energyCellMaterial = new THREE.MeshStandardMaterial({
+            color: 0x0f95e6,
+            emissive: 0x0f95e6,
+            emissiveIntensity: 0.5
+        });
+        const energyCell = new THREE.Mesh(energyCellGeometry, energyCellMaterial);
+        energyCell.position.set(5, 1, 0);
+        scene.add(energyCell);
+        
+        createInteractableObject(
+            new THREE.Vector3(5, 1, 0),
+            1,
+            'Pressione E para coletar Célula de Energia',
+            function() {
+                addItemToInventory({
+                    id: 'energycell',
+                    name: 'Célula de Energia',
+                    description: 'Uma célula de energia de alta capacidade. Pode ser usada para recarregar dispositivos ou restaurar sua energia pessoal.',
+                    image: 'https://via.placeholder.com/64x64.png?text=Energy',
+                    usable: true,
+                    onUse: function() {
+                        player.energy = 100;
+                        updateEnergyBar();
+                        showNotification('Energia restaurada ao máximo!');
+                        removeItemFromInventory('energycell');
+                    }
+                });
+                scene.remove(energyCell);
+                // Remover o objeto interativo
+                interactableObjects = interactableObjects.filter(obj => obj.position.distanceTo(new THREE.Vector3(5, 1, 0)) > 0.1);
+            }
+        );
+        
+        function checkInteractions() {
+            const interactionElement = document.getElementById('interaction');
+            let nearbyObject = null;
+            
+            for (let i = 0; i < interactableObjects.length; i++) {
+                const obj = interactableObjects[i];
+                const distance = player.position.distanceTo(obj.position);
+                
+                if (distance < obj.radius) {
+                    nearbyObject = obj;
+                    break;
+                }
+            }
+            
+            if (nearbyObject) {
+                interactionElement.textContent = nearbyObject.message;
+                interactionElement.style.display = 'block';
+                
+                if (keys['KeyE']) {
+                    nearbyObject.action();
+                }
+            } else {
+                interactionElement.style.display = 'none';
+            }
+        }
+        
+        function interact() {
+            for (let i = 0; i < interactableObjects.length; i++) {
+                const obj = interactableObjects[i];
+                const distance = player.position.distanceTo(obj.position);
+                
+                if (distance < obj.radius) {
+                    obj.action();
+                    return;
+                }
+            }
+        }
+        
+        // Interface do usuário
+        function toggleJournal() {
+            const journal = document.getElementById('journal');
+            journal.style.display = journal.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function toggleInventory() {
+            const inventory = document.getElementById('inventory');
+            if (inventory.style.display === 'none') {
+                inventory.style.display = 'block';
+                populateInventory();
+            } else {
+                inventory.style.display = 'none';
+                document.getElementById('item-details').style.display = 'none';
+            }
+        }
+        
+        function toggleMinimap() {
+            const minimap = document.getElementById('minimap');
+            minimap.style.display = minimap.style.display === 'none' ? 'block' : 'none';
+            updateMinimap();
+        }
+        
+        function toggleMenu() {
+            const menu = document.getElementById('game-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        function updateObjective(text) {
+            document.getElementById('objective').textContent = text;
+        }
+        
+        function addJournalEntry(title, content) {
+            const journalContent = document.getElementById('journal-content');
+            const entry = document.createElement('div');
+            entry.className = 'journal-entry';
+            
+            const entryTitle = document.createElement('h3');
+            entryTitle.textContent = title;
+            
+            const entryContent = document.createElement('p');
+            entryContent.textContent = content;
+            
+            entry.appendChild(entryTitle);
+            entry.appendChild(entryContent);
+            
+            journalContent.appendChild(entry);
+            
+            showNotification('Nova entrada adicionada ao diário');
+        }
+        
+        function showDialog(speaker, text, options) {
+            const dialog = document.getElementById('dialog');
+            const dialogSpeaker = document.getElementById('dialog-speaker');
+            const dialogText = document.getElementById('dialog-text');
+            const dialogOptions = document.getElementById('dialog-options');
+            
+            dialogSpeaker.textContent = speaker;
+            dialogText.textContent = text;
+            dialogOptions.innerHTML = '';
+            
+            options.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'dialog-option';
+                optionElement.textContent = option.text;
+                optionElement.addEventListener('click', option.action);
+                
+                dialogOptions.appendChild(optionElement);
+            });
+            
+            dialog.style.display = 'block';
+        }
+        
+        function hideDialog() {
+            document.getElementById('dialog').style.display = 'none';
+        }
+        
+        function showScanResults() {
+            const scanResults = document.getElementById('scan-results');
+            const scanData = document.getElementById('scan-data');
+            
+            // Calcular distância até a torre central
+            const distanceToTower = player.position.distanceTo(new THREE.Vector3(0, 50, -50));
+            
+            scanData.innerHTML = `
+                <p>Iniciando escaneamento energético...</p>
+                <p>Analisando campo eletromagnético em um raio de 100 metros.</p>
+                <p>Temperatura ambiente: 18°C</p>
+                <p>Umidade: 65%</p>
+                <p>Partículas ionizadas: <span class="scan-highlight">Acima do normal (237 ppm)</span></p>
+                <p>Distorção espaço-temporal: <span class="scan-warning">DETECTADA</span></p>
+                <p>Anomalias energéticas: <span class="scan-highlight">3 detectadas</span></p>
+                <p>Distância até fonte principal: ${Math.floor(distanceToTower)}m</p>
+                <p>Recomendação: Investigar a Torre Central para análise detalhada.</p>
+            `;
+            
+            scanResults.style.display = 'block';
+        }
+        
+        document.getElementById('journal-close').addEventListener('click', () => {
+            document.getElementById('journal').style.display = 'none';
         });
         
-        // Redimensionar
+        document.getElementById('inventory-close').addEventListener('click', () => {
+            document.getElementById('inventory').style.display = 'none';
+        });
+        
+        document.getElementById('scan-close').addEventListener('click', () => {
+            document.getElementById('scan-results').style.display = 'none';
+        });
+        
+        document.getElementById('settings-close').addEventListener('click', () => {
+            document.getElementById('settings-panel').style.display = 'none';
+        });
+        
+        document.getElementById('menu-button').addEventListener('click', toggleMenu);
+        
+        document.getElementById('menu-inventory').addEventListener('click', () => {
+            toggleInventory();
+            toggleMenu();
+        });
+        
+        document.getElementById('menu-journal').addEventListener('click', () => {
+            toggleJournal();
+            toggleMenu();
+        });
+        
+        document.getElementById('menu-map').addEventListener('click', () => {
+            toggleMinimap();
+            toggleMenu();
+        });
+        
+        document.getElementById('menu-settings').addEventListener('click', () => {
+            document.getElementById('settings-panel').style.display = 'block';
+            toggleMenu();
+        });
+        
+        document.getElementById('menu-help').addEventListener('click', () => {
+            showDialog(
+                'Ajuda',
+                'Use WASD ou as setas para se mover. Espaço para pular. Shift para correr. E para interagir com objetos. J para abrir o diário. I para abrir o inventário. Tab para abrir o mapa.',
+                [
+                    {
+                        text: 'Entendi',
+                        action: function() {
+                            hideDialog();
+                        }
+                    }
+                ]
+            );
+            toggleMenu();
+        });
+        
+        document.getElementById('menu-exit').addEventListener('click', () => {
+            showDialog(
+                'Sair',
+                'Tem certeza que deseja sair? Todo o progresso não salvo será perdido.',
+                [
+                    {
+                        text: 'Sim',
+                        action: function() {
+                            document.getElementById('intro').style.display = 'flex';
+                            hideDialog();
+                        }
+                    },
+                    {
+                        text: 'Não',
+                        action: function() {
+                            hideDialog();
+                        }
+                    }
+                ]
+            );
+            toggleMenu();
+        });
+        
+        document.getElementById('scanner').addEventListener('click', showScanResults);
+        
+        // Atualizar barras de energia e saúde
+        function updateEnergyBar() {
+            document.getElementById('energy-level').style.width = player.energy + '%';
+            document.getElementById('energy-label').textContent = 'Energia: ' + Math.floor(player.energy) + '%';
+        }
+        
+        function updateHealthBar() {
+            document.getElementById('health-level').style.width = player.health + '%';
+            document.getElementById('health-label').textContent = 'Saúde: ' + Math.floor(player.health) + '%';
+        }
+        
+        // Atualizar minimapa
+        function updateMinimap() {
+            const minimapCanvas = document.getElementById('minimap-canvas');
+            const ctx = minimapCanvas.getContext('2d');
+            
+            // Definir tamanho do canvas
+            minimapCanvas.width = 200;
+            minimapCanvas.height = 200;
+            
+            // Limpar canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+            
+            // Desenhar borda
+            ctx.strokeStyle = '#0f95e6';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+            
+            // Desenhar prédios
+            ctx.fillStyle = '#333';
+            cityGroup.children.forEach(building => {
+                const x = (building.position.x / citySize) * 100 + 100;
+                const z = (building.position.z / citySize) * 100 + 100;
+                const width = (building.geometry.parameters.width / citySize) * 100;
+                const depth = (building.geometry.parameters.depth / citySize) * 100;
+                
+                ctx.fillRect(x - width/2, z - depth/2, width, depth);
+            });
+            
+            // Desenhar torre central
+            ctx.fillStyle = '#0f95e6';
+            const towerX = (centralTower.position.x / citySize) * 100 + 100;
+            const towerZ = (centralTower.position.z / citySize) * 100 + 100;
+            ctx.beginPath();
+            ctx.arc(towerX, towerZ, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Desenhar jogador
+            ctx.fillStyle = '#ff3030';
+            const playerX = (player.position.x / citySize) * 100 + 100;
+            const playerZ = (player.position.z / citySize) * 100 + 100;
+            
+            // Desenhar cone de visão
+            ctx.fillStyle = 'rgba(255, 48, 48, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(playerX, playerZ);
+            ctx.arc(playerX, playerZ, 15, player.rotation - Math.PI/4, player.rotation + Math.PI/4);
+            ctx.lineTo(playerX, playerZ);
+            ctx.fill();
+            
+            // Desenhar ponto do jogador
+            ctx.fillStyle = '#ff3030';
+            ctx.beginPath();
+            ctx.arc(playerX, playerZ, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Efeitos especiais
+        function showGlitchEffect() {
+            const glitchOverlay = document.getElementById('glitch-overlay');
+            glitchOverlay.style.display = 'block';
+            glitchOverlay.style.opacity = '0.7';
+            
+            setTimeout(() => {
+                glitchOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    glitchOverlay.style.display = 'none';
+                }, 300);
+            }, 1000);
+        }
+        
+        function createRain() {
+            const weatherEffects = document.getElementById('weather-effects');
+            weatherEffects.innerHTML = '';
+            
+            for (let i = 0; i < 100; i++) {
+                const raindrop = document.createElement('div');
+                raindrop.className = 'rain-drop';
+                raindrop.style.left = Math.random() * 100 + '%';
+                raindrop.style.top = Math.random() * 100 + '%';
+                raindrop.style.animationDuration = 0.5 + Math.random() * 0.5 + 's';
+                raindrop.style.animationDelay = Math.random() * 2 + 's';
+                weatherEffects.appendChild(raindrop);
+            }
+        }
+        
+        function createLightning() {
+            const lightning = document.querySelector('.lightning');
+            lightning.style.opacity = '1';
+            
+            setTimeout(() => {
+                lightning.style.opacity = '0';
+            }, 100);
+        }
+        
+        // Inicialização
+        document.getElementById('start-button').addEventListener('click', () => {
+            document.getElementById('intro').style.display = 'none';
+            
+            // Iniciar efeitos climáticos
+            createRain();
+            setInterval(createLightning, 10000 + Math.random() * 20000);
+        });
+        
+        // Configurações de áudio
+        const audioListener = new THREE.AudioListener();
+        camera.add(audioListener);
+        
+        // Carregar sons
+        const soundLoader = new THREE.AudioLoader();
+        
+        // Som ambiente
+        const ambientSound = new THREE.Audio(audioListener);
+        soundLoader.load('https://cdn.freesound.org/previews/398/398015_7542161-lq.mp3', function(buffer) {
+            ambientSound.setBuffer(buffer);
+            ambientSound.setLoop(true);
+            ambientSound.setVolume(0.5);
+            ambientSound.play();
+            updateLoadingProgress("Carregando sons ambientes...");
+        });
+        
+        // Som de passos
+        const footstepSound = new THREE.Audio(audioListener);
+        soundLoader.load('https://cdn.freesound.org/previews/268/268557_5003039-lq.mp3', function(buffer) {
+            footstepSound.setBuffer(buffer);
+            footstepSound.setVolume(0.3);
+            updateLoadingProgress("Carregando efeitos sonoros...");
+        });
+        
+        // Estatísticas de desempenho
+        const stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
+        
+        // Atualizar posição da câmera
+        function updateCamera() {
+            camera.position.x = player.position.x;
+            camera.position.y = player.position.y;
+            camera.position.z = player.position.z;
+            
+            // Atualizar rotação da câmera com base na rotação do jogador
+            camera.rotation.y = player.rotation;
+        }
+        
+        // Atualizar bússola
+        function updateCompass() {
+            const compassPointer = document.getElementById('compass-pointer');
+            
+            // Calcular ângulo para a torre central
+            const dx = centralTower.position.x - player.position.x;
+            const dz = centralTower.position.z - player.position.z;
+            const angle = Math.atan2(dz, dx) - player.rotation;
+            
+            compassPointer.style.transform = `rotate(${angle}rad)`;
+        }
+        
+        // Loop de animação
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            stats.begin();
+            
+            // Atualizar posição do jogador
+            const moveSpeed = player.run ? player.speed * 2 : player.speed;
+            
+            // Movimento para frente/trás
+            if (player.moveForward) {
+                player.velocity.z = -moveSpeed;
+            } else if (player.moveBackward) {
+                player.velocity.z = moveSpeed;
+            } else {
+                player.velocity.z = 0;
+            }
+            
+            // Movimento para esquerda/direita
+            if (player.moveLeft) {
+                player.velocity.x = -moveSpeed;
+            } else if (player.moveRight) {
+                player.velocity.x = moveSpeed;
+            } else {
+                player.velocity.x = 0;
+            }
+            
+            // Aplicar gravidade
+            if (!player.onGround) {
+                player.velocity.y -= player.gravity;
+            }
+            
+            // Calcular nova posição
+            const newPosition = player.position.clone();
+            
+            // Aplicar rotação ao movimento
+            if (player.velocity.x !== 0 || player.velocity.z !== 0) {
+                const angle = player.rotation;
+                const moveX = player.velocity.z * Math.sin(angle) + player.velocity.x * Math.cos(angle);
+                const moveZ = player.velocity.z * Math.cos(angle) - player.velocity.x * Math.sin(angle);
+                
+                newPosition.x += moveX;
+                newPosition.z += moveZ;
+                
+                // Tocar som de passos
+                if (!footstepSound.isPlaying && player.onGround) {
+                    footstepSound.play();
+                }
+                
+                // Consumir energia ao correr
+                if (player.run) {
+                    player.energy = Math.max(0, player.energy - 0.1);
+                    updateEnergyBar();
+                }
+            }
+            
+            // Aplicar movimento vertical
+            newPosition.y += player.velocity.y;
+            
+            // Verificar colisão
+            if (!checkCollision(newPosition)) {
+                player.position.copy(newPosition);
+            } else {
+                // Se houver colisão, tentar mover apenas no eixo X
+                newPosition.copy(player.position);
+                newPosition.x += player.velocity.z * Math.sin(player.rotation) + player.velocity.x * Math.cos(player.rotation);
+                
+                if (!checkCollision(newPosition)) {
+                    player.position.copy(newPosition);
+                } else {
+                    // Se ainda houver colisão, tentar mover apenas no eixo Z
+                    newPosition.copy(player.position);
+                    newPosition.z += player.velocity.z * Math.cos(player.rotation) - player.velocity.x * Math.sin(player.rotation);
+                    
+                    if (!checkCollision(newPosition)) {
+                        player.position.copy(newPosition);
+                    }
+                }
+            }
+            
+            // Verificar se o jogador está no chão
+            if (player.position.y <= player.height) {
+                player.position.y = player.height;
+                player.velocity.y = 0;
+                player.onGround = true;
+            }
+            
+            // Atualizar câmera
+            updateCamera();
+            
+            // Atualizar bússola
+            updateCompass();
+            
+            // Verificar interações
+            checkInteractions();
+            
+            // Atualizar informações do HUD
+            document.getElementById('position').textContent = `Posição: X:${player.position.x.toFixed(1)} Y:${player.position.y.toFixed(1)} Z:${player.position.z.toFixed(1)}`;
+            document.getElementById('fps').textContent = `FPS: ${Math.round(stats.fps)}`;
+            
+            // Animar objetos
+            energyRing.rotation.y += 0.01;
+            towerLight.intensity = 1.5 + Math.sin(Date.now() * 0.002) * 0.5;
+            
+            // Renderizar cena
+            renderer.render(scene, camera);
+            
+            stats.end();
+        }
+        
+        // Redimensionar janela
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
         
-        // Loop de jogo
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            // Movimentação
-            const direction = new THREE.Vector3();
-            
-            // Avançar/retroceder
-            if (keys.forward) {
-                direction.z = -1;
-            } else if (keys.backward) {
-                direction.z = 1;
-            }
-            
-            // Esquerda/direita
-            if (keys.left) {
-                direction.x = -1;
-            } else if (keys.right) {
-                direction.x = 1;
-            }
-            
-            // Normaliza para evitar movimento diagonal mais rápido
-            if (direction.length() > 0) {
-                direction.normalize();
-            }
-            
-            // Converte a direção de acordo com a rotação da câmera
-            direction.applyEuler(new THREE.Euler(0, player.rotation.y, 0));
-            
-            // Movimento horizontal
-            player.position.x += direction.x * moveSpeed;
-            player.position.z += direction.z * moveSpeed;
-            
-            // Gravidade e pulo
-            player.velocity.y -= gravity;
-            
-            // Verifica se está no chão
-            if (player.position.y <= 1.6) {
-                player.onGround = true;
-                player.position.y = 1.6;
-                player.velocity.y = 0;
-            }
-            
-            // Pular
-            if (keys.jump && player.onGround) {
-                player.velocity.y = jumpForce;
-                player.onGround = false;
-            }
-            
-            // Aplica velocidade vertical
-            player.position.y += player.velocity.y;
-            
-            // Renderiza a cena
-            renderer.render(scene, camera);
-        }
-        
+        // Iniciar animação
         animate();
+        
+        // Carregar recursos adicionais
+        updateLoadingProgress("Inicializando física...");
+        updateLoadingProgress("Carregando interface do usuário...");
+        updateLoadingProgress("Configurando controles...");
+        updateLoadingProgress("Gerando mundo...");
+        updateLoadingProgress("Carregando NPCs...");
+        updateLoadingProgress("Inicializando IA...");
+        updateLoadingProgress("Configurando missões...");
+        updateLoadingProgress("Carregamento concluído!");
     </script>
 </body>
 </html>
