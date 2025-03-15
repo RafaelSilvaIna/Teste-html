@@ -1,112 +1,296 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste API Kiwify</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Jogo 3D em HTML</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            font-family: Arial, sans-serif;
+        }
+        canvas { 
+            display: block; 
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            padding: 5px;
+            z-index: 100;
+        }
+        #controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <header class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-4">Produtos Kiwify</h1>
-            <div id="status" class="text-sm font-medium"></div>
-        </header>
-
-        <!-- Loading spinner -->
-        <div id="loading" class="hidden">
-            <div class="flex justify-center items-center">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            </div>
-        </div>
-
-        <!-- Error message -->
-        <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-        </div>
-
-        <!-- Products grid -->
-        <div id="products" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        </div>
+<body>
+    <div id="info">Jogo 3D em HTML</div>
+    <div id="controls">
+        Controles:<br>
+        WASD ou Setas - Mover<br>
+        Espaço - Pular<br>
+        Mouse - Olhar ao redor
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        const API_URL = 'https://apiprodutos-delta.vercel.app';
-        const loading = document.getElementById('loading');
-        const error = document.getElementById('error');
-        const products = document.getElementById('products');
-        const status = document.getElementById('status');
-
-        function showLoading() {
-            loading.classList.remove('hidden');
-            error.classList.add('hidden');
+        // Configuração básica
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Cor do céu
+        
+        // Câmera
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.6, 0); // Altura de uma pessoa
+        
+        // Renderizador
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        
+        // Controles
+        const moveSpeed = 0.15;
+        const jumpForce = 0.15;
+        const gravity = 0.006;
+        
+        // Estado do jogador
+        const player = {
+            position: camera.position,
+            velocity: new THREE.Vector3(0, 0, 0),
+            onGround: false,
+            direction: new THREE.Vector3(),
+            rotation: new THREE.Euler(0, 0, 0, 'YXZ')
+        };
+        
+        // Teclas pressionadas
+        const keys = {
+            forward: false,
+            backward: false,
+            left: false,
+            right: false,
+            jump: false
+        };
+        
+        // Iluminação
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 10, 10);
+        scene.add(directionalLight);
+        
+        // Criando o chão
+        const groundGeometry = new THREE.PlaneGeometry(100, 100);
+        const groundMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x228B22, 
+            side: THREE.DoubleSide 
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = Math.PI / 2;
+        ground.position.y = 0;
+        scene.add(ground);
+        
+        // Criando obstáculos e decorações
+        function createCube(x, y, z, color, size = 1) {
+            const geometry = new THREE.BoxGeometry(size, size, size);
+            const material = new THREE.MeshStandardMaterial({ color: color });
+            const cube = new THREE.Mesh(geometry, material);
+            cube.position.set(x, y, z);
+            scene.add(cube);
+            return cube;
         }
-
-        function hideLoading() {
-            loading.classList.add('hidden');
+        
+        // Criar cubos coloridos espalhados pelo cenário
+        for (let i = 0; i < 30; i++) {
+            const x = Math.random() * 50 - 25;
+            const z = Math.random() * 50 - 25;
+            const size = Math.random() * 2 + 0.5;
+            const y = size / 2;
+            const color = Math.random() * 0xffffff;
+            createCube(x, y, z, color, size);
         }
-
-        function showError(message) {
-            error.textContent = message;
-            error.classList.remove('hidden');
+        
+        // Criar algumas árvores simples
+        function createTree(x, z) {
+            // Tronco
+            const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
+            const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+            trunk.position.set(x, 1, z);
+            scene.add(trunk);
+            
+            // Copa
+            const topGeometry = new THREE.ConeGeometry(1, 2, 8);
+            const topMaterial = new THREE.MeshStandardMaterial({ color: 0x006400 });
+            const top = new THREE.Mesh(topGeometry, topMaterial);
+            top.position.set(x, 3, z);
+            scene.add(top);
         }
-
-        function formatPrice(price) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(price);
-        }
-
-        function createProductCard(product) {
-            return `
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="p-6">
-                        <h2 class="text-xl font-semibold text-gray-800 mb-2">${product.name}</h2>
-                        <p class="text-gray-600 mb-4">${product.description || 'Sem descrição'}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-2xl font-bold text-blue-600">${formatPrice(product.price)}</span>
-                            <span class="px-3 py-1 text-sm font-medium rounded-full ${
-                                product.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                            }">${product.status === 'active' ? 'Ativo' : 'Inativo'}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function fetchProducts() {
-            try {
-                showLoading();
-                status.textContent = 'Conectando à API...';
-
-                const response = await fetch(`${API_URL}/products`);
-                
-                if (!response.ok) {
-                    throw new Error(`Erro ao carregar produtos: ${response.status}`);
-                }
-
-                const data = await response.json();
-                status.textContent = 'API conectada com sucesso!';
-                status.classList.add('text-green-600');
-
-                if (data.data && Array.isArray(data.data)) {
-                    products.innerHTML = data.data
-                        .map(product => createProductCard(product))
-                        .join('');
-                } else {
-                    products.innerHTML = '<p class="col-span-full text-center text-gray-500">Nenhum produto encontrado</p>';
-                }
-            } catch (err) {
-                showError(`Erro: ${err.message}`);
-                status.textContent = 'Erro na conexão com a API';
-                status.classList.add('text-red-600');
-            } finally {
-                hideLoading();
+        
+        // Criar algumas árvores aleatórias
+        for (let i = 0; i < 15; i++) {
+            const x = Math.random() * 60 - 30;
+            const z = Math.random() * 60 - 30;
+            // Evitar árvores muito perto do centro onde o jogador começa
+            if (Math.abs(x) > 5 || Math.abs(z) > 5) {
+                createTree(x, z);
             }
         }
-
-        // Iniciar carregamento dos produtos
-        document.addEventListener('DOMContentLoaded', fetchProducts);
+        
+        // Eventos de teclado
+        document.addEventListener('keydown', (event) => {
+            switch (event.code) {
+                case 'KeyW':
+                case 'ArrowUp':
+                    keys.forward = true;
+                    break;
+                case 'KeyS':
+                case 'ArrowDown':
+                    keys.backward = true;
+                    break;
+                case 'KeyA':
+                case 'ArrowLeft':
+                    keys.left = true;
+                    break;
+                case 'KeyD':
+                case 'ArrowRight':
+                    keys.right = true;
+                    break;
+                case 'Space':
+                    keys.jump = true;
+                    break;
+            }
+        });
+        
+        document.addEventListener('keyup', (event) => {
+            switch (event.code) {
+                case 'KeyW':
+                case 'ArrowUp':
+                    keys.forward = false;
+                    break;
+                case 'KeyS':
+                case 'ArrowDown':
+                    keys.backward = false;
+                    break;
+                case 'KeyA':
+                case 'ArrowLeft':
+                    keys.left = false;
+                    break;
+                case 'KeyD':
+                case 'ArrowRight':
+                    keys.right = false;
+                    break;
+                case 'Space':
+                    keys.jump = false;
+                    break;
+            }
+        });
+        
+        // Controle de mouse
+        let mouseCaptured = false;
+        
+        document.addEventListener('click', () => {
+            if (!mouseCaptured) {
+                renderer.domElement.requestPointerLock();
+                mouseCaptured = true;
+            }
+        });
+        
+        document.addEventListener('pointerlockchange', () => {
+            mouseCaptured = document.pointerLockElement === renderer.domElement;
+        });
+        
+        document.addEventListener('mousemove', (event) => {
+            if (mouseCaptured) {
+                const movementX = event.movementX || 0;
+                const movementY = event.movementY || 0;
+                
+                player.rotation.y -= movementX * 0.002;
+                player.rotation.x -= movementY * 0.002;
+                
+                // Limitar a rotação vertical para evitar flip
+                player.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, player.rotation.x));
+                
+                // Aplicar rotação à câmera
+                camera.rotation.set(player.rotation.x, player.rotation.y, 0);
+            }
+        });
+        
+        // Redimensionar
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Loop de jogo
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Movimentação
+            const direction = new THREE.Vector3();
+            
+            // Avançar/retroceder
+            if (keys.forward) {
+                direction.z = -1;
+            } else if (keys.backward) {
+                direction.z = 1;
+            }
+            
+            // Esquerda/direita
+            if (keys.left) {
+                direction.x = -1;
+            } else if (keys.right) {
+                direction.x = 1;
+            }
+            
+            // Normaliza para evitar movimento diagonal mais rápido
+            if (direction.length() > 0) {
+                direction.normalize();
+            }
+            
+            // Converte a direção de acordo com a rotação da câmera
+            direction.applyEuler(new THREE.Euler(0, player.rotation.y, 0));
+            
+            // Movimento horizontal
+            player.position.x += direction.x * moveSpeed;
+            player.position.z += direction.z * moveSpeed;
+            
+            // Gravidade e pulo
+            player.velocity.y -= gravity;
+            
+            // Verifica se está no chão
+            if (player.position.y <= 1.6) {
+                player.onGround = true;
+                player.position.y = 1.6;
+                player.velocity.y = 0;
+            }
+            
+            // Pular
+            if (keys.jump && player.onGround) {
+                player.velocity.y = jumpForce;
+                player.onGround = false;
+            }
+            
+            // Aplica velocidade vertical
+            player.position.y += player.velocity.y;
+            
+            // Renderiza a cena
+            renderer.render(scene, camera);
+        }
+        
+        animate();
     </script>
 </body>
 </html>
