@@ -188,6 +188,7 @@ canvas {
   height: 100%;
   pointer-events: none;
   z-index: 10;
+  display: none;
 }
 
 #score-container {
@@ -332,6 +333,7 @@ canvas {
   height: 40px;
   pointer-events: none;
   z-index: 20;
+  display: none;
 }
 
 .crosshair::before,
@@ -380,6 +382,7 @@ canvas {
   z-index: 15;
   opacity: 0;
   transition: opacity 0.3s ease;
+  display: none;
 }
 
 /* Weapon Selector */
@@ -391,6 +394,7 @@ canvas {
   display: flex;
   gap: 10px;
   z-index: 20;
+  display: none;
 }
 
 .weapon-option {
@@ -449,6 +453,7 @@ canvas {
   border: 2px solid #00ffff;
   z-index: 20;
   opacity: 0.8;
+  display: none;
 }
 
 #minimap-canvas {
@@ -494,6 +499,7 @@ canvas {
   text-align: center;
   z-index: 950;
   width: 300px;
+  display: none;
 }
 
 #pause-menu h2 {
@@ -543,12 +549,5 @@ canvas {
     transform: translateX(0);
     opacity: 1;
   }
-}
-
-/* Stats.js panel */
-#stats {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
 }
 
